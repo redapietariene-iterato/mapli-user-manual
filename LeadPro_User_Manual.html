@@ -1,0 +1,1708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeadPro User Manual</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --text-light: #64748b;
+            --border-color: #e2e8f0;
+            --success-color: #22c55e;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding-top: 160px;
+        }
+        
+        /* Fixed Header */
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 1.5rem 2rem;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        header p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+        
+        /* Fixed Navigation - below header */
+        nav {
+            background: var(--card-bg);
+            padding: 0.75rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            position: fixed;
+            top: 120px;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            flex-wrap: wrap;
+        }
+        
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        
+        nav a:hover {
+            background: var(--bg-color);
+            color: var(--primary-color);
+        }
+        
+        nav a.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .current-section {
+            background: var(--accent-color);
+            color: white;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        /* Section styling */
+        section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        section h2 {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.75rem;
+        }
+        
+        section h3 {
+            color: var(--text-color);
+            margin: 1.5rem 0 1rem;
+            font-size: 1.3rem;
+        }
+        
+        section h4 {
+            color: var(--secondary-color);
+            margin: 1.25rem 0 0.75rem;
+            font-size: 1.1rem;
+        }
+        
+        /* Two-column grid layout for content + video */
+        .content-with-video {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+            align-items: start;
+            margin: 1.5rem 0;
+        }
+        
+        .content-column {
+            min-width: 0;
+        }
+        
+        .video-column {
+            position: sticky;
+            top: 170px;
+        }
+        
+        /* Video panel styling */
+        .video-panel {
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            aspect-ratio: 16/9;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .video-panel iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            pointer-events: none;
+        }
+        
+        .video-panel video {
+            width: 100%;
+            height: 100%;
+            border: none;
+            pointer-events: none;
+        }
+        
+        .video-panel:hover {
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        /* Play button overlay */
+        .play-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.4);
+            transition: background 0.3s;
+        }
+        
+        .video-panel:hover .play-overlay {
+            background: rgba(0,0,0,0.3);
+        }
+        
+        .play-button {
+            width: 70px;
+            height: 70px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, background 0.2s;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+        }
+        
+        .video-panel:hover .play-button {
+            transform: scale(1.1);
+            background: var(--primary-dark);
+        }
+        
+        .play-button::after {
+            content: "";
+            width: 0;
+            height: 0;
+            border-left: 22px solid white;
+            border-top: 14px solid transparent;
+            border-bottom: 14px solid transparent;
+            margin-left: 5px;
+        }
+        
+        .video-label {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        /* Modal for expanded video */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            position: relative;
+            width: 100%;
+            max-width: 1000px;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .modal-content iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .modal-content video {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: -50px;
+            right: 0;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            line-height: 1;
+        }
+        
+        .modal-close:hover {
+            color: var(--accent-color);
+        }
+        
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.95rem;
+        }
+        
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+        
+        th {
+            background: var(--bg-color);
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background: var(--bg-color);
+        }
+        
+        /* Lists */
+        ul, ol {
+            margin: 0.75rem 0 0.75rem 1.5rem;
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Steps */
+        .steps {
+            background: var(--bg-color);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        .step {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+            counter-increment: step-counter;
+        }
+        
+        .step::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0.5rem;
+            width: 1.5rem;
+            height: 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .steps {
+            counter-reset: step-counter;
+        }
+        
+        /* Boxes */
+        .success-box {
+            background: #dcfce7;
+            border-left: 4px solid var(--success-color);
+            padding: 1rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1rem 0;
+        }
+        
+        .info-box {
+            background: #dbeafe;
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1rem 0;
+        }
+        
+        .warning-box {
+            background: #fef3c7;
+            border-left: 4px solid var(--warning-color);
+            padding: 1rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1rem 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .content-with-video {
+                grid-template-columns: 1fr;
+            }
+            
+            .video-column {
+                position: relative;
+                top: 0;
+            }
+            
+            nav {
+                top: 80px;
+                padding: 0.5rem 1rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .nav-links {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .current-section {
+                display: none;
+            }
+            
+            body {
+                padding-top: 180px;
+            }
+            
+            header h1 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            section {
+                padding: 1.5rem;
+            }
+            
+            nav a {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.8rem;
+            }
+            
+            .modal-content {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>LeadPro User Manual</h1>
+        <p>Complete Guide for Platform Usage</p>
+    </header>
+    
+    <nav>
+        <div class="nav-links">
+            <a href="#module1">Overview</a>
+            <a href="#module2">Plan Event</a>
+            <a href="#groups-users">Groups</a>
+            <a href="#devices">Devices</a>
+            <a href="#media-sources">Media</a>
+            <a href="#zones-sectors">Zones</a>
+            <a href="#tasks">Tasks</a>
+            <a href="#event-plan">Event Plan</a>
+            <a href="#evacuation">Evacuation</a>
+            <a href="#incidents">Incidents</a>
+            <a href="#mobile">Mobile</a>
+        </div>
+        <div class="current-section" id="currentSection">Overview</div>
+    </nav>
+    
+    <!-- Modal for expanded video -->
+    <div class="modal" id="videoModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <video id="modalVideo" controls autoplay></video>
+        </div>
+    </div>
+    
+    <div class="container">
+        <section id="module1">
+            <h2>Module 1: Platform Overview And Navigation</h2>
+
+            <div class="content-column">
+                <h3>1. Layout Overview</h3>
+            
+            <h4>Top Bar</h4>
+            <ul>
+                <li><strong>Events Dropdown:</strong> Displays the currently active event. You can switch between events from this menu.</li>
+                <li><strong>Search Bar:</strong> Used to find specific addresses or locations on the map. Type any address to quickly navigate there.</li>
+                <li><strong>View Selector:</strong>
+                    <ul>
+                        <li><strong>Map:</strong> Displays the main interactive map view.</li>
+                        <li><strong>Control Room:</strong> Alternative view for monitoring.</li>
+                    </ul>
+                </li>
+                <li><strong>User & Notifications (top-right):</strong>
+                    <ul>
+                        <li>Notification bell shows new notifications.</li>
+                        <li>Settings icon opens user preferences and system configuration.</li>
+                    </ul>
+                </li>
+            </ul>
+            
+            <h3>2. Left Sidebar Menu</h3>
+            <p>The left menu provides access to all operational layers of the system:</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Menu</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>ℹ️ Info</td><td>Displays general information of event details.</td></tr>
+                    <tr><td>🧩 Layers</td><td>Controls visibility of map elements (groups, structures, incidents, tasks, areas, evacuation routes).</td></tr>
+                    <tr><td>🧭 Tasks</td><td>Lists and manages all created tasks. You can view, edit, or add new ones.</td></tr>
+                    <tr><td>⚠️ Incidents</td><td>Shows current and past incidents on the map. Each incident is represented by a marker.</td></tr>
+                    <tr><td>🚒 Units</td><td>Displays available units (users) and their status.</td></tr>
+                    <tr><td>💬 Messages</td><td>Opens the messaging panel for communication.</td></tr>
+                    <tr><td>🚨 Evacuation</td><td>Provides tool for creating or managing evacuation routes.</td></tr>
+                </tbody>
+            </table>
+            
+            <h3>3. Map Elements</h3>
+            <ul>
+                <li><strong>Sync button:</strong> Import all cameras from FlexControl Registry.</li>
+                <li><strong>Monitor button:</strong> Copies map to clipboard.</li>
+                <li><strong>Home button:</strong> Centers the event on the map.</li>
+                <li><strong>Ruler button:</strong> Measure distance on the map.</li>
+                <li><strong>Zoom in/out buttons:</strong> Zoom the map.</li>
+            </ul>
+            </div>
+        </section>
+        <section id="module2">
+            <h2>Module 2: Plan and Manage A Large Outdoor Event</h2>
+
+            <div class="content-with-video">
+                <div class="content-column">
+                    <h3>Plan Event</h3>
+            
+            <h4 id="create-event">Create Operation (Event) from Scratch</h4>
+            
+            <p><strong>Accessing Event Creation:</strong></p>
+            <div class="steps">
+                <div class="step">From the main navigation, go to <strong>Platform Settings → Events</strong>.</div>
+                <div class="step">Click the <strong>New Item</strong> button located at the top of the Events list.</div>
+                <div class="step">The Event Creation screen will open.</div>
+            </div>
+            
+            <p><strong>Event Details (Left Panel):</strong></p>
+            <p>Use the panel on the left side of the screen to define the core details of your event:</p>
+            <ul>
+                <li><strong>Event Name</strong> – Enter a clear, descriptive title for your event.</li>
+                <li><strong>Description</strong> – Provide any relevant details, objectives, or notes.</li>
+                <li><strong>Start and End Date</strong> – Set the time frame during which the event will be active.</li>
+                <li><strong>Groups</strong> – Assign existing groups that will participate in or oversee the event.</li>
+                <li><strong>Users</strong> – Add individual users who will take part or have monitoring responsibilities.</li>
+                <li><strong>Devices</strong> – Include devices (e.g., GPS trackers, drones) that will be used during the event.</li>
+            </ul>
+            
+            <p><strong>Map Tools:</strong></p>
+            <p>The right side of the screen contains an interactive map where you can define the geographical aspects of your event:</p>
+            <ul>
+                <li><strong>Draw Sectors</strong> – Define specific areas where activities or monitoring will take place.</li>
+                <li><strong>Draw Lines</strong> – Mark paths or patrol routes relevant to event operations.</li>
+                <li><strong>Place Points</strong> – Pinpoint specific locations of interest such as checkpoints or observation posts.</li>
+            </ul>
+            
+            <div class="success-box">
+                <strong>✅ Result:</strong> Once all details and map elements are configured, click <strong>Save</strong> to finalize event creation. Your new event will appear in the Events list.
+            </div>
+                </div>
+                <div class="video-column">
+                    <div class="video-panel" 
+			onclick="openVideoWindow('videos/video_01.mp4')" role=button tabindex=0>
+                        <video src="videos/video_01.mp4" preload="metadata"></video>
+                        <div class="play-overlay">
+                            <div class="play-button"></div>
+                        </div>
+                        <div class="video-label">Click to expand</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-with-video">
+                <div class="content-column">
+                    <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+            
+            <h4 id="create-template">Create Template from Scratch</h4>
+            <p>Event templates allow you to predefine and store event configurations that can be reused later to create new events quickly and consistently.</p>
+            
+            <div class="steps">
+                <div class="step">From the main navigation, go to <strong>Platform Settings → Events</strong>.</div>
+                <div class="step">Open the <strong>Event Templates</strong> tab at the top of the page.</div>
+                <div class="step">Click the <strong>New Item</strong> button to start creating a new template.</div>
+            </div>
+            
+            <p><strong>Template Configuration:</strong></p>
+            <ul>
+                <li><strong>Template Name</strong> – Enter a descriptive name for the template.</li>
+                <li><strong>Description</strong> – Add notes or context about the template's purpose.</li>
+                <li><strong>Groups</strong> – Add one or more groups that will be linked to this template.</li>
+                <li>On the map area, you can add Points, Lines, and Sectors.</li>
+            </ul>
+                </div>
+                <div class="video-column">
+                    <div class="video-panel" 
+	onclick="openVideoWindow('videos/TemplateCreation.mp4')" role=button tabindex=0>
+                        <video src="videos/TemplateCreation.mp4" preload="metadata"></video>
+                        <div class="play-overlay">
+                            <div class="play-button"></div>
+                        </div>
+                        <div class="video-label">Click to expand</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-with-video">
+                <div class="content-column">
+                    <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+            
+            <h4>Create Operation (Event) from Template</h4>
+            <div class="steps">
+                <div class="step">Go to <strong>Platform Settings → Events → Event Templates</strong> tab.</div>
+                <div class="step">Click on the eye icon to open the template.</div>
+                <div class="step">Click the Info button on the left side, then click the plus (+) icon to create an event.</div>
+                <div class="step">Enter Event Name, Start Date, and End Date, then click <strong>Create</strong>.</div>
+            </div>
+                </div>
+                <div class="video-column">
+                    <div class="video-panel" 
+			onclick="openVideoWindow('videos/EventCreationFromTemplate.mp4')"
+role=button tabindex=0>
+                        <video src="videos/EventCreationFromTemplate.mp4" preload="metadata"></video>
+                        <div class="play-overlay">
+                            <div class="play-button"></div>
+                        </div>
+                        <div class="video-label">Click to expand</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-with-video">
+                <div class="content-column">
+                    <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+            
+            <h4>Create Template from Existing Operation</h4>
+            <div class="steps">
+                <div class="step">Go to <strong>Platform Settings → Events</strong> and locate the event.</div>
+                <div class="step">Click the eye button, then click Info on the left-side panel.</div>
+                <div class="step">Click the burger menu (☰) and select "Create Template from This Event".</div>
+                <div class="step">Edit the Template Name and dates, optionally include tasks, then click <strong>Create</strong>.</div>
+            </div>
+                </div>
+                <div class="video-column">
+                    <div class="video-panel" 
+			onclick="openVideoWindow('videos/CreateTemplateFromEvent.mp4')"
+role=button tabindex=0>
+                        <video src="videos/CreateTemplateFromEvent.mp4" preload="metadata"></video>
+                        <div class="play-overlay">
+                            <div class="play-button"></div>
+                        </div>
+                        <div class="video-label">Click to expand</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="groups-users">
+            <h2>👥 Create Groups and Users</h2>
+
+            <div class="content-with-video">
+                <div class="content-column">
+                    <p>In the Settings section, administrators can manage all system entities such as Groups, Users, Roles, Events, Devices, Media Sources, and Icons.</p>
+            
+            <h3>🧩 Create a New Group</h3>
+            <div class="steps">
+                <div class="step">Navigate to <strong>Settings → Groups</strong>.</div>
+                <div class="step">Click the <strong>New Item</strong> button.</div>
+                <div class="step">Fill in: <strong>Group Name</strong>, <strong>Color</strong>, <strong>Icon</strong>, and optionally assign other groups.</div>
+                <div class="step">Click <strong>Save</strong> to create the group.</div>
+            </div>
+            
+            <h3>👤 Create a New User</h3>
+            <div class="steps">
+                <div class="step">Navigate to <strong>Settings → Users</strong>.</div>
+                <div class="step">Click the <strong>New Item</strong> button.</div>
+                <div class="step">Fill in: Username, Password, Name, Email, Phone Number, Group, and Role.</div>
+                <div class="step">Click <strong>Save</strong> to create the new user.</div>
+            </div>
+            
+            <div class="info-box">
+                <strong>💡 Tip:</strong> You can edit existing users or groups by clicking the Edit (✏️) icon next to their entry.
+            </div>
+                </div>
+                <div class="video-column">
+                    <div class="video-panel" 
+			onclick="openVideoWindow('videos/GroupsAndUsers.mp4')" role=button
+tabindex=0>
+                        <video src="videos/GroupsAndUsers.mp4" preload="metadata"></video>
+                        <div class="play-overlay">
+                            <div class="play-button"></div>
+                        </div>
+                        <div class="video-label">Click to expand</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="devices">
+            <h2>🔧 Devices Management</h2>
+
+            <div class="content-with-video">
+                <div class="content-column">
+                    <p>The Devices section allows administrators to create and manage hardware devices linked with users or groups inside the event.</p>
+            
+            <h3>📍 Accessing Devices</h3>
+            <div class="steps">
+                <div class="step">In the left panel, click <strong>Settings</strong>.</div>
+                <div class="step">Select <strong>Devices</strong> from the submenu.</div>
+                <div class="step">A device management table will appear showing all existing devices.</div>
+            </div>
+            
+            <h3>➕ Creating a New Device</h3>
+            <div class="steps">
+                <div class="step">Click the "New Item" button at the top right of the Devices page.</div>
+                <div class="step">Fill in: <strong>Device Title</strong>, <strong>Device ID</strong>, <strong>Icon</strong>, <strong>Media Device</strong>, and <strong>Assign To</strong>.</div>
+                <div class="step">Click <strong>Save</strong>.</div>
+            </div>
+                </div>
+                <div class="video-column">
+                    <div class="video-panel" 
+			onclick="openVideoWindow('videos/DevicesCrud.mp4')" role=button tabindex=0>
+                        <video src="videos/DevicesCrud.mp4" preload="metadata"></video>
+                        <div class="play-overlay">
+                            <div class="play-button"></div>
+                        </div>
+                        <div class="video-label">Click to expand</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="media-sources">
+            <h2>🎥 Media Sources</h2>
+
+            <div class="content-with-video">
+                <div class="content-column">
+                    <p>The Media Sources module allows administrators to register and manage external video or media streams (e.g., CCTV cameras, ONVIF cameras, push/pull streams).</p>
+            
+            <h3>➕ Creating a New Media Source</h3>
+            <div class="steps">
+                <div class="step">Go to <strong>Settings → Media Sources</strong>.</div>
+                <div class="step">Click "New Item" in the top-right corner.</div>
+                <div class="step">Fill in: <strong>Title</strong>, <strong>Type</strong> (Push/Pull/ONVIF), and <strong>URL</strong>.</div>
+                <div class="step">Click <strong>Save</strong> to finish creating the media source.</div>
+            </div>
+                </div>
+                <div class="video-column">
+                    <div class="video-panel" 
+			onclick="openVideoWindow('videos/MediaSourcesCrud.mp4')" role=button
+tabindex=0>
+                        <video src="videos/MediaSourcesCrud.mp4" preload="metadata"></video>
+                        <div class="play-overlay">
+                            <div class="play-button"></div>
+                        </div>
+                        <div class="video-label">Click to expand</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="zones-sectors">
+            <h2>🗺️ Draw Zones and Sectors</h2>
+
+            <div class="content-with-video">
+                <div class="content-column">
+                    <h3>🏗️ Create a Structure on the Map</h3>
+            <p>A Structure represents a fixed location or object on the event map — such as a command post, observation point, or an area equipped with devices like drones or beacons.</p>
+            
+            <div class="steps">
+                <div class="step">Navigate to the Event Creation screen or open an existing event in Edit Mode.</div>
+                <div class="step">On the map toolbar, click the GPS icon to activate structure placement mode.</div>
+                <div class="step">Click on the desired location on the map where you want to place the structure.</div>
+                <div class="step">Configure: <strong>Icon Selection</strong>, <strong>Structure Name</strong>, and attach devices if needed.</div>
+                <div class="step">Click anywhere on the map to save the structure.</div>
+            </div>
+            
+            <h3>🟩 Draw a Sector on the Map</h3>
+            <p>A Sector represents a defined area on the map — such as a patrol zone, restricted area, or operational region.</p>
+            
+            <div class="steps">
+                <div class="step">On the map toolbar, click the <strong>Sector icon</strong> to activate sector drawing mode.</div>
+                <div class="step">Start drawing the area by clicking to create each corner point.</div>
+                <div class="step">Click on the last point to close the area.</div>
+                <div class="step">Configure: <strong>Color</strong>, <strong>Title</strong>, <strong>Smoothness</strong>, and <strong>Fill Opacity</strong>.</div>
+                <div class="step">Click anywhere on the map to save the sector.</div>
+            </div>
+                </div>
+                <div class="video-column">
+                    <div class="video-panel" onclick="openVideoWindow('videos/sectors_lines_points.mp4')" role=button tabindex=0>
+                        <video src="videos/sectors_lines_points.mp4" preload="metadata"></video>
+                        <div class="play-overlay">
+                            <div class="play-button"></div>
+                        </div>
+                        <div class="video-label">Click to expand</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-with-video">
+                <div class="content-column">
+                    
+                </div>
+            <h3>Create Multimedia Sources</h3>
+                <div class="video-column">
+                    <div class="video-panel" 
+			onclick="openVideoWindow('videos/MultimediaSources.mp4')" role=button
+tabindex=0>
+                        <video src="videos/MultimediaSources.mp4" preload="metadata"></video>
+                        <div class="play-overlay">
+                            <div class="play-button"></div>
+                        </div>
+                        <div class="video-label">Click to expand</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="tasks">
+            <h2>📝 Create Tasks</h2>
+
+            <div class="content-with-video">
+                <div class="content-column">
+                    <p>Tasks are assignments that users must complete during an event. LeadPro supports multiple task types for different operational needs.</p>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>📍 Location Task</h4>
+                    <p>Requires users to reach a specific point on the map within a defined radius.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🗺️ Area Task</h4>
+                    <p>Requires users to monitor or secure a defined zone/sector.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🛤️ Path Task</h4>
+                    <p>Requires users to follow a route through predefined checkpoints.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>⚙️ Action Task</h4>
+                    <p>Non-location-based task for general actions or duties.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📡 Beacon Task</h4>
+                    <p>Linked to beacon devices for indoor location tracking.</p>
+                </div>
+            </div>
+            
+            <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+            
+            <h3>📍 Create a Location Task</h3>
+            <div class="steps">
+                <div class="step">Navigate to your Event and click <strong>Tasks</strong> on the left panel.</div>
+                <div class="step">Click <strong>Create New Task</strong> and select <strong>Location Task</strong>.</div>
+                <div class="step">Click on the map to place the task location marker.</div>
+                <div class="step">Fill in: Task Name, Description, Start/End Date, Location Radius (min 10m), and Assigned Users.</div>
+                <div class="step">Click <strong>Save</strong> to create the task.</div>
+            </div>
+                </div>
+                <div class="video-column">
+                    <div class="video-panel" 
+onclick="openVideoWindow('videos/LocationTask.mp4')" role=button
+tabindex=0>
+                        <video src="videos/LocationTask.mp4" preload="metadata"></video>
+                        <div class="play-overlay">
+                            <div class="play-button"></div>
+                        </div>
+                        <div class="video-label">Click to expand</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-with-video">
+                <div class="content-column">
+                    <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+            
+            <h3>🗺️ Create an Area Task</h3>
+            <div class="steps">
+                <div class="step">Click <strong>Create New Task</strong> and select <strong>Area Task</strong>.</div>
+                <div class="step">Click <strong>Draw</strong> to create a new area or <strong>Select</strong> to choose an existing area.</div>
+                <div class="step">Fill in: Task Title, Description, Start/End Date, Group of Users, and Unit count.</div>
+                <div class="step">Click <strong>Register the Task</strong> to finalize.</div>
+            </div>
+                </div>
+                <div class="video-column">
+                    <div class="video-panel" 
+			onclick="openVideoWindow('videos/AreaTask.mp4')" role=button tabindex=0>
+                        <video src="videos/AreaTask.mp4" preload="metadata"></video>
+                        <div class="play-overlay">
+                            <div class="play-button"></div>
+                        </div>
+                        <div class="video-label">Click to expand</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-with-video">
+                <div class="content-column">
+                    <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+            
+            <h3>🛤️ Create a Path Task</h3>
+            <div class="steps">
+                <div class="step">Click <strong>Create New Task</strong> and select <strong>Path Task</strong>.</div>
+                <div class="step">Draw the path on the map — each click sets a checkpoint.</div>
+                <div class="step">Double-click or click the last checkpoint again to finish.</div>
+                <div class="step">Fill in: Task Title, Description, Checkpoint Radius (min 5m), and assign Groups/Users.</div>
+                <div class="step">Click <strong>Register the Task</strong>.</div>
+            </div>
+                </div>
+                <div class="video-column">
+                    <div class="video-panel" 
+			onclick="openVideoWindow('videos/PathTask.mp4')" role=button tabindex=0>
+                        <video src="videos/PathTask.mp4" preload="metadata"></video>
+                        <div class="play-overlay">
+                            <div class="play-button"></div>
+                        </div>
+                        <div class="video-label">Click to expand</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-with-video">
+                <div class="content-column">
+                    <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+            
+            <h3>⚙️ Create an Action Task</h3>
+            <p>Action Tasks are not tied to any specific location on the map.</p>
+            <div class="steps">
+                <div class="step">Click <strong>Create New Task</strong> and select <strong>Action Task</strong>.</div>
+                <div class="step">Fill in: Task Name, Description, Start/End Date, and assign Groups/Users.</div>
+                <div class="step">Click <strong>Register the Task</strong>.</div>
+            </div>
+            
+            <div class="warning-box">
+                <strong>⚠️ Note:</strong> If the task is not marked as completed by the end time, it will automatically be marked as "Failed."
+            </div>
+                </div>
+                <div class="video-column">
+                    <div class="video-panel" 
+			onclick="openVideoWindow('videos/ActionTask.mp4')" role=button tabindex=0>
+                        <video src="videos/ActionTask.mp4" preload="metadata"></video>
+                        <div class="play-overlay">
+                            <div class="play-button"></div>
+                        </div>
+                        <div class="video-label">Click to expand</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-with-video">
+                <div class="content-column">
+                    <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+            
+            <h3>📡 Create a Beacon Task</h3>
+            <div class="steps">
+                <div class="step">Click <strong>Create New Task</strong> and select <strong>Beacon Task</strong>.</div>
+                <div class="step">Click on an existing beacon structure on the map.</div>
+                <div class="step">Fill in: Task Name, Description, Start/End Date, and assign Groups/Users.</div>
+                <div class="step">Click <strong>Register the Task</strong>.</div>
+            </div>
+                </div>
+                <div class="video-column">
+                    <div class="video-panel" 
+			onclick="openVideoWindow('videos/BeaconTask.mp4')" role=button tabindex=0>
+                        <video src="videos/BeaconTask.mp4" preload="metadata"></video>
+                        <div class="play-overlay">
+                            <div class="play-button"></div>
+                        </div>
+                        <div class="video-label">Click to expand</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="event-plan">
+            <h2>📄 Generate Event Plan Document</h2>
+
+            <div class="content-with-video">
+                <div class="content-column">
+                    <p>The Event Plan Document provides a complete summary of an event, including its details, participants, and tasks.</p>
+            
+            <div class="steps">
+                <div class="step">Navigate to your Event Info page.</div>
+                <div class="step">Click the burger menu (☰) in the top-right corner.</div>
+                <div class="step">Select <strong>Download Word Document</strong> from the list.</div>
+            </div>
+            
+            <p><strong>The generated Word document includes:</strong></p>
+            <ul>
+                <li>Event Name, Description, Start and End Dates</li>
+                <li>List of Participants (groups, users, and devices)</li>
+                <li>Tasks Overview with names, descriptions, timing, and assigned users</li>
+            </ul>
+                </div>
+                <div class="video-column">
+                    <div class="video-panel" 
+			onclick="openVideoWindow('videos/EventPlan.mp4')" role=button tabindex=0>
+                        <video src="videos/EventPlan.mp4" preload="metadata"></video>
+                        <div class="play-overlay">
+                            <div class="play-button"></div>
+                        </div>
+                        <div class="video-label">Click to expand</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="evacuation">
+            <h2>🚨 Evacuation Routes Planning</h2>
+
+            <div class="content-with-video">
+                <div class="content-column">
+                    <p>The Evacuation feature allows event administrators to plan, visualize, and manage evacuation routes directly on the event map.</p>
+            
+            <h3>🔧 Accessing the Evacuation Panel</h3>
+            <div class="steps">
+                <div class="step">Navigate to your Event.</div>
+                <div class="step">On the left side panel, click the <strong>Evacuation</strong> button.</div>
+                <div class="step">The Evacuation panel will open with options to turn mode on/off, add routes, or edit existing routes.</div>
+            </div>
+            
+            <h3>🚨 Turning Evacuation Mode On or Off</h3>
+            <ul>
+                <li>Toggle the <strong>Evacuation Mode</strong> switch in the panel.</li>
+                <li>When activated: notifications are sent to all mobile users, a banner appears in the web interface, and the action is logged.</li>
+            </ul>
+            
+            <h3>🗺️ Adding an Evacuation Route</h3>
+            <div class="steps">
+                <div class="step">Click <strong>Add Route</strong> in the Evacuation panel.</div>
+                <div class="step">On the map, click to set the starting point, then click again to set the endpoint.</div>
+                <div class="step">The route will display length and estimated travel time.</div>
+                <div class="step">Repeat for additional routes, then click <strong>Save All</strong>.</div>
+            </div>
+            
+            <h3>✏️ Editing Routes</h3>
+            <p>Each route can be edited directly from the panel. Modify the path or change the mode of travel (Walking, Cycling, or Driving).</p>
+                </div>
+                <div class="video-column">
+                    <div class="video-panel" 
+			onclick="openVideoWindow('videos/Evacuation.mp4')" role=button tabindex=0>
+                        <video src="videos/Evacuation.mp4" preload="metadata"></video>
+                        <div class="play-overlay">
+                            <div class="play-button"></div>
+                        </div>
+                        <div class="video-label">Click to expand</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="incidents">
+            <h2>⚠️ Managing Incidents</h2>
+
+            <div class="content-with-video">
+                <div class="content-column">
+                    <p>The Incidents feature allows you to create, view, and manage incidents directly on the event map.</p>
+            
+            <h3>🆕 Creating a New Incident</h3>
+            <div class="steps">
+                <div class="step">Navigate to your Event and click <strong>Incidents</strong> on the left panel.</div>
+                <div class="step">Click <strong>Create New Incident</strong>.</div>
+                <div class="step">Click on the map where the incident occurred.</div>
+                <div class="step">Fill in: Incident Level (Critical/Major/Minor), Description, Assigned Groups.</div>
+                <div class="step">Optionally check "Create as Task" to generate a related task.</div>
+                <div class="step">Click <strong>Register New Incident</strong>.</div>
+            </div>
+            
+            <h3>✏️ Managing Existing Incidents</h3>
+            <ul>
+                <li>Click on any incident in the list or map to edit details.</li>
+                <li>Statuses: <strong>Not Resolved</strong> (active) or <strong>Resolved</strong> (addressed).</li>
+                <li>Options: Delete, Locate on Map, Mark as Resolved.</li>
+            </ul>
+            
+            <h3>💬 Incident Messaging and Media Sharing</h3>
+            <p>Each incident includes a Comments section for direct communication:</p>
+            <ul>
+                <li>Send text messages</li>
+                <li>Attach and send photos</li>
+                <li>Attach and send video files</li>
+            </ul>
+                </div>
+                <div class="video-column">
+                    <div class="video-panel" 
+			onclick="openVideoWindow('videos/Incidents.mp4')" role=button tabindex=0>
+                        <video src="videos/Incidents.mp4" preload="metadata"></video>
+                        <div class="play-overlay">
+                            <div class="play-button"></div>
+                        </div>
+                        <div class="video-label">Click to expand</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="activity-log">
+            <h2>🔔 Activity Log & Notifications</h2>
+
+            <div class="content-column">
+                <p>The Activity Log keeps users informed about all important events. Notifications appear as a bell icon with a red counter.</p>
+            
+            <p><strong>Notification Triggers:</strong></p>
+            <ul>
+                <li>New invitation code created</li>
+                <li>User added to a chat channel</li>
+                <li>Channel name changed</li>
+                <li>Task reminders</li>
+                <li>Timeline path imported</li>
+                <li>Request to start video streaming</li>
+                <li>Incident created</li>
+                <li>Message sent in any channel</li>
+                <li>Video streaming started/ended</li>
+                <li>Task user failed</li>
+                <li>User check-in completed</li>
+                <li>Task started with insufficient users</li>
+            </ul>
+            </div>
+        </section>
+        <section id="realtime-locations">
+            <h2>📍 Monitor Real-Time Locations</h2>
+
+            <div class="content-column">
+                <p>The Real-Time Location Monitoring feature allows administrators to continuously track the movement of all active mobile users.</p>
+            
+            <div class="info-box">
+                <strong>How it works:</strong> When a user opens the mobile app (even in background), their location is automatically updated on the web map. Location is refreshed every second (or faster) for smooth, accurate movement tracking.
+            </div>
+            
+            <p>This feature helps event administrators:</p>
+            <ul>
+                <li>Maintain full situational awareness</li>
+                <li>Monitor patrolling activities</li>
+                <li>Respond quickly to incidents based on precise, live user locations</li>
+            </ul>
+            </div>
+        </section>
+        <section id="tasks-review">
+            <h2>📝 Tasks Review</h2>
+
+            <div class="content-column">
+                <p>The Tasks Review feature allows event administrators to view, filter, and analyze all tasks created for a specific event.</p>
+            
+            <h3>📍 Accessing the Tasks List</h3>
+            <div class="steps">
+                <div class="step">Navigate to your Event.</div>
+                <div class="step">On the left side panel, click <strong>Tasks</strong>.</div>
+                <div class="step">View the full list of tasks created for this event.</div>
+            </div>
+            
+            <h3>📂 Task Status Tabs</h3>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>⏳ Pending</h4>
+                    <p>Tasks that have not been fully completed yet.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>✅ Completed</h4>
+                    <p>Tasks that were successfully carried out.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>❌ Failed</h4>
+                    <p>Tasks that were not completed within their allowed conditions.</p>
+                </div>
+            </div>
+            
+            <h3>🔍 Searching for Tasks</h3>
+            <p>Use the Search Bar at the top of the Tasks page to search by task title, type, ID, group, user, or any related keyword.</p>
+            
+            <h3>📊 Task Report Table</h3>
+            <p>Click the <strong>Task Report</strong> button to open a detailed, export-ready table displaying:</p>
+            <table>
+                <tr><td><strong>ID</strong></td><td>Unique task identifier</td></tr>
+                <tr><td><strong>Type</strong></td><td>Location, Area, Path, Action, Beacon, etc.</td></tr>
+                <tr><td><strong>Title</strong></td><td>Name of the task</td></tr>
+                <tr><td><strong>Description</strong></td><td>Task details or purpose</td></tr>
+                <tr><td><strong>Status</strong></td><td>Pending / Completed / Failed</td></tr>
+                <tr><td><strong>Starts / Ends</strong></td><td>Task start and end times</td></tr>
+                <tr><td><strong>Group</strong></td><td>Group assigned to the task</td></tr>
+                <tr><td><strong>Users</strong></td><td>All participating users</td></tr>
+                <tr><td><strong>Registered By</strong></td><td>Administrator who created the task</td></tr>
+                <tr><td><strong>Comments</strong></td><td>Number of comments or media added</td></tr>
+            </table>
+            </div>
+        </section>
+        <section id="messaging">
+            <h2>💬 Messaging</h2>
+
+            <div class="content-with-video">
+                <div class="content-column">
+                    <p>The Messaging feature allows event participants to communicate in real time through text, voice, photo, and video messages.</p>
+            
+            <h3>🧭 Accessing the Messaging Panel</h3>
+            <div class="steps">
+                <div class="step">Navigate to your Event.</div>
+                <div class="step">On the left side panel, click the <strong>Messaging</strong> button.</div>
+                <div class="step">View existing chats and channels in the Messaging panel.</div>
+            </div>
+            
+            <h3>💡 Types of Channels</h3>
+            <ul>
+                <li><strong>General Channel</strong> – A shared channel including all members of the event.</li>
+                <li><strong>Group Channels</strong> – Automatically created for each group added to the event.</li>
+                <li><strong>Custom Channels</strong> – Create your own for private or small-group communication.</li>
+            </ul>
+            
+            <h3>🆕 Creating a New Channel</h3>
+            <div class="steps">
+                <div class="step">Click the <strong>Create Channel</strong> button.</div>
+                <div class="step">Select participants (individuals or groups).</div>
+                <div class="step">Enter a Channel Name (optional for private chats).</div>
+                <div class="step">Click <strong>Create</strong> to start the conversation.</div>
+            </div>
+            
+            <h3>💬 Sending Messages and Media</h3>
+            <ul>
+                <li>Send text messages</li>
+                <li>Record and send voice messages</li>
+                <li>Attach and send photos</li>
+                <li>Attach and send videos</li>
+            </ul>
+                </div>
+                <div class="video-column">
+                    <div class="video-panel" 
+			onclick="openVideoWindow('videos/Messaging.mp4')" role=button tabindex=0>
+                        <video src="videos/Messaging.mp4" preload="metadata"></video>
+                        <div class="play-overlay">
+                            <div class="play-button"></div>
+                        </div>
+                        <div class="video-label">Click to expand</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="timeline">
+            <h2>🕒 Timeline</h2>
+
+            <div class="content-with-video">
+                <div class="content-column">
+                    <p>The Timeline feature allows event administrators to review user movement history on the map, visualizing tracked paths over a selected time period.</p>
+            
+            <h3>🧭 Accessing the Timeline</h3>
+            <div class="steps">
+                <div class="step">Navigate to your Event.</div>
+                <div class="step">At the bottom center of the screen, click <strong>Show Timeline</strong>.</div>
+                <div class="step">The Timeline panel will appear with time range and filtering options.</div>
+            </div>
+            
+            <h3>🗓️ Using the Timeline</h3>
+            <ul>
+                <li>The system tracks users' locations through the mobile app, drawing paths on the map.</li>
+                <li>Filter by date and time to focus on specific activity periods.</li>
+                <li>The corresponding movement path will appear as a drawn route.</li>
+            </ul>
+            
+            <h3>🔶 Adjusting the Time Range</h3>
+            <p>Use the orange time bar at the bottom of the panel:</p>
+            <ul>
+                <li><strong>Drag edges</strong> – Shrink or expand the time frame.</li>
+                <li><strong>Move the bar</strong> – Shift the visible time range left or right.</li>
+                <li>The map updates automatically to show movements within the selected window.</li>
+            </ul>
+                </div>
+                <div class="video-column">
+                    <div class="video-panel" 
+			onclick="openVideoWindow('videos/Timeline.mp4')" role=button tabindex=0>
+                        <video src="videos/Timeline.mp4" preload="metadata"></video>
+                        <div class="play-overlay">
+                            <div class="play-button"></div>
+                        </div>
+                        <div class="video-label">Click to expand</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="mobile">
+            <h2>📱 Mobile App - Execute Event (Field Personnel)</h2>
+
+            <div class="content-with-video">
+                <div class="content-column">
+                    <p>Field personnel use the mobile app to execute tasks, report incidents, and communicate with administrators in real-time.</p>
+            
+            <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+            
+            <h3>📍 Location Change Task</h3>
+            <p>Requires the user to reach a specific point on the map within the defined radius.</p>
+            
+            <h4>📱 Accessing the Task</h4>
+            <div class="steps">
+                <div class="step">Open the Mobile App.</div>
+                <div class="step">Tap <strong>Tasks</strong> in the bottom navigation bar.</div>
+                <div class="step">Find and tap your Location Change Task in "My Tasks".</div>
+            </div>
+            
+            <h4>ℹ️ Task Details Screen</h4>
+            <ul>
+                <li><strong>Navigation Button</strong> – Returns to the main map screen.</li>
+                <li><strong>Map Preview</strong> – Shows the exact task location.</li>
+                <li><strong>Task Overview</strong> – ID, type, and participant info.</li>
+                <li><strong>Task Timing</strong> – Start and end times.</li>
+                <li><strong>User Status</strong> – Pending, Completed, or Failed lists.</li>
+                <li><strong>Comments Button</strong> – Add text, photos, or videos.</li>
+            </ul>
+            
+            <h4>✅ Completing the Task</h4>
+            <p>Move physically to the pinned location. Once you enter the defined radius, the system automatically marks the task as Completed.</p>
+                </div>
+                <div class="video-column">
+                    <div class="video-panel" 
+			onclick="openVideoWindow('videos/MobileLocationTask.mp4')" role=button tabindex=0>
+                        <video src="videos/MobileLocationTask.mp4" preload="metadata"></video>
+                        <div class="play-overlay">
+                            <div class="play-button"></div>
+                        </div>
+                        <div class="video-label">Click to expand</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-with-video">
+                <div class="content-column">
+                    <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+            
+            <h3>🗺️ Area (Sector Monitoring) Task</h3>
+            <p>Requires users to enter and remain within a defined area for the specified duration.</p>
+            
+            <h4>Key Actions</h4>
+            <ul>
+                <li><strong>Check In</strong> – Tap when entering the area to start patrolling.</li>
+                <li><strong>Check Out</strong> – Tap when finished.</li>
+            </ul>
+            
+            <div class="warning-box">
+                <strong>⚠️ Important:</strong> After checking out, you cannot check in again for the same task. Checking out early marks the task as Failed for your user.
+            </div>
+                </div>
+                <div class="video-column">
+                    <div class="video-panel" 
+			onclick="openVideoWindow('videos/AreaTaskMobile.mp4')" role=button tabindex=0>
+                        <video src="videos/AreaTaskMobile.mp4" preload="metadata"></video>
+                        <div class="play-overlay">
+                            <div class="play-button"></div>
+                        </div>
+                        <div class="video-label">Click to expand</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-with-video">
+                <div class="content-column">
+                    <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+            
+            <h3>🛤️ Path Task</h3>
+            <p>Requires users to move through predefined checkpoints on the map.</p>
+            
+            <h4>Completing the Task</h4>
+            <ul>
+                <li>Locate checkpoints on the map.</li>
+                <li>Move physically toward each checkpoint.</li>
+                <li>When your position enters the checkpoint's radius, it's marked as passed.</li>
+                <li>You can visit checkpoints in any order.</li>
+                <li>Once all checkpoints are passed, the task is Completed.</li>
+            </ul>
+                </div>
+                <div class="video-column">
+                    <div class="video-panel" 
+			onclick="openVideoWindow('videos/PathMobile.mp4')" role=button tabindex=0>
+                        <video src="videos/PathMobile.mp4" preload="metadata"></video>
+                        <div class="play-overlay">
+                            <div class="play-button"></div>
+                        </div>
+                        <div class="video-label">Click to expand</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-with-video">
+                <div class="content-column">
+                    <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+            
+            <h3>⚙️ Action Task</h3>
+            <p>Non-location-based task that can be completed manually.</p>
+            
+            <h4>Completing the Task</h4>
+            <p>Simply tap the <strong>Complete Task</strong> button to mark it as done.</p>
+            
+            <div class="info-box">
+                <strong>Note:</strong> If an end time is set and the task isn't completed before that time, it automatically fails. Once failed, users cannot manually complete it.
+            </div>
+                </div>
+                <div class="video-column">
+                    <div class="video-panel" 
+			onclick="openVideoWindow('videos/ActionTaskMobile.mp4')" role=button tabindex=0>
+                        <video src="videos/ActionTaskMobile.mp4" preload="metadata"></video>
+                        <div class="play-overlay">
+                            <div class="play-button"></div>
+                        </div>
+                        <div class="video-label">Click to expand</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-column">
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+            
+            <h3>📡 Beacon Task</h3>
+            <p>Requires the user to reach a specific indoor location with a beacon device.</p>
+            
+            <h4>Completing the Task</h4>
+            <div class="steps">
+                <div class="step">Go to the task location shown on the map.</div>
+                <div class="step">Tap <strong>Start Scanning</strong> when near the beacon.</div>
+                <div class="step">The system detects your proximity and marks the task as Completed.</div>
+            </div>
+            
+            <div class="info-box">
+                <strong>💡 Tip:</strong> Ensure Bluetooth is enabled on your mobile device to detect beacons.
+            </div>
+            </div>
+        </section>
+        <section id="mobile-incidents">
+            <h2>🚨 Mobile App - Creating Incidents</h2>
+
+            <div class="content-with-video">
+                <div class="content-column">
+                    <p>The mobile app allows users to quickly report emergencies using the SOS button.</p>
+            
+            <h3>📍 Accessing the SOS Button</h3>
+            <p>On the main map screen, look for the <strong>SOS button</strong> in the bottom-left corner.</p>
+            
+            <h3>🚨 Creating an Incident via SOS</h3>
+            <div class="steps">
+                <div class="step"><strong>Press and hold</strong> the SOS button for 2 seconds.</div>
+                <div class="step">The system automatically creates a <strong>Critical</strong> incident at your current GPS position.</div>
+            </div>
+            
+            <div class="success-box">
+                <strong>✅ Result:</strong> A Critical incident with status "Not Resolved" is created immediately at your location — no additional input required.
+            </div>
+                </div>
+                <div class="video-column">
+                    <div class="video-panel" 
+			onclick="openVideoWindow('videos/IncidentMobile.mp4')" role=button tabindex=0>
+                        <video src="videos/IncidentMobile.mp4" preload="metadata"></video>
+                        <div class="play-overlay">
+                            <div class="play-button"></div>
+                        </div>
+                        <div class="video-label">Click to expand</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-column">
+                <h3>📁 Viewing and Managing Incidents</h3>
+            <div class="steps">
+                <div class="step">Tap <strong>Incidents</strong> in the bottom navigation bar.</div>
+                <div class="step">View the list of all incidents related to the event.</div>
+                <div class="step">Tap any incident to view details and add comments.</div>
+            </div>
+            
+            <h3>💬 Commenting & Attachments</h3>
+            <p>Inside any incident, you can:</p>
+            <ul>
+                <li>Send text messages</li>
+                <li>Attach photos and videos</li>
+                <li>Record and send voice messages</li>
+            </ul>
+            </div>
+        </section>
+        <section id="mobile-messaging">
+            <h2>💬 Mobile App - Messaging</h2>
+
+            <div class="content-with-video">
+                <div class="content-column">
+                    <p>Communicate in real-time with event participants through text, media, and voice messages.</p>
+            
+            <h3>📍 Accessing Messaging</h3>
+            <div class="steps">
+                <div class="step">Open the Mobile App.</div>
+                <div class="step">Tap <strong>Messages</strong> in the bottom navigation panel.</div>
+                <div class="step">View existing channels and conversations.</div>
+            </div>
+            
+            <h3>💡 Types of Channels</h3>
+            <ul>
+                <li><strong>General Channel</strong> – All event users.</li>
+                <li><strong>Group Channel</strong> – Automatically created for each group.</li>
+                <li><strong>Custom Channels / DMs</strong> – Create your own or message group members directly.</li>
+            </ul>
+            
+            <h3>📨 Sending Messages and Media</h3>
+            <ul>
+                <li>Send text messages</li>
+                <li>Attach and send photos</li>
+                <li>Attach and send videos</li>
+                <li>Record and send voice messages</li>
+            </ul>
+                </div>
+                <div class="video-column">
+                    <div class="video-panel" 
+			onclick="openVideoWindow('videos/MessagingMobile.mp4')" role=button tabindex=0>
+                        <video src="videos/MessagingMobile.mp4" preload="metadata"></video>
+                        <div class="play-overlay">
+                            <div class="play-button"></div>
+                        </div>
+                        <div class="video-label">Click to expand</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="mobile-evacuation">
+            <h2>🚨 Mobile App - Evacuation Mode</h2>
+
+            <div class="content-with-video">
+                <div class="content-column">
+                    <p>Evacuation Mode guides mobile users safely to exit points during emergencies.</p>
+            
+            <h3>📍 Receiving Evacuation Alerts</h3>
+            <ul>
+                <li>When Evacuation Mode is activated in the Web App, all mobile users receive a real-time notification.</li>
+                <li>A red evacuation button with a running person icon appears on screen.</li>
+            </ul>
+            
+            <h3>🛣️ Selecting Evacuation Route</h3>
+            <div class="steps">
+                <div class="step">Tap the <strong>Evacuation Button</strong>.</div>
+                <div class="step">Choose your mode: <strong>Walking</strong>, <strong>Cycling</strong>, or <strong>Driving</strong>.</div>
+                <div class="step">Tap <strong>Generate</strong> to calculate your route.</div>
+            </div>
+            
+            <h3>📍 Route Guidance</h3>
+            <ul>
+                <li>The system generates a path to the closest evacuation endpoint.</li>
+                <li>Users are always routed to the nearest safe exit based on current location.</li>
+                <li>The path is displayed on the map for users to follow safely.</li>
+            </ul>
+                </div>
+                <div class="video-column">
+                    <div class="video-panel" 
+			onclick="openModal('videos/EvacuationMobile.mp4')">
+                        <video src="videos/EvacuationMobile.mp4" preload="metadata"></video>
+                        <div class="play-overlay">
+                            <div class="play-button"></div>
+                        </div>
+                        <div class="video-label">Click to expand</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="additional-modules">
+            <h2>📚 Additional Modules</h2>
+
+            <div class="content-column">
+                <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>Module 3: Respond To Unplanned Man-Made Disaster</h4>
+                    <p>Documentation coming soon for responding to unexpected man-made emergencies.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Module 4: Manage A Natural Disaster Incident</h4>
+                    <p>Documentation coming soon for natural disaster management operations.</p>
+                </div>
+            </div>
+            </div>
+        </section>
+
+    </div>
+    
+    <script>
+// OpenWindow function	
+function openVideoWindow(videoSrc) {
+    const url = 'video-player.html?src=' + encodeURIComponent(videoSrc);
+
+    // Size + placement (browsers may clamp/ignore some features)
+    const w = 720, h = 405;
+    const left = Math.max(0, Math.round((screen.width - w) / 2));
+    const top  = Math.max(0, Math.round((screen.height - h) / 2));
+
+    const features =
+      `popup=yes,width=${w},height=${h},left=${left},top=${top},` +
+      `resizable=yes,scrollbars=no,noopener=yes,noreferrer=yes`;
+
+    const win = window.open(url, 'videoWindow', features);
+    if (win) win.focus();
+  }
+
+        // Modal functions
+        function openModal(videoUrl) {
+            const modal = document.getElementById('videoModal');
+            const video = document.getElementById('modalVideo');
+            video.src = videoUrl;
+            video.play();
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeModal() {
+            const modal = document.getElementById('videoModal');
+            const video = document.getElementById('modalVideo');
+            video.pause();
+            video.src = '';
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
+        // Close modal on outside click
+        document.getElementById('videoModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+        
+        // Close modal on ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+        
+        // Section tracking for navigation
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('nav a');
+        const currentSectionDisplay = document.getElementById('currentSection');
+        
+        const sectionNames = {
+            'module1': 'Overview',
+            'module2': 'Plan Event',
+            'groups-users': 'Groups & Users',
+            'devices': 'Devices',
+            'media-sources': 'Media Sources',
+            'zones-sectors': 'Zones & Sectors',
+            'tasks': 'Tasks',
+            'event-plan': 'Event Plan',
+            'evacuation': 'Evacuation',
+            'incidents': 'Incidents',
+            'activity-log': 'Activity Log',
+            'realtime-locations': 'Realtime Locations',
+            'tasks-review': 'Tasks Review',
+            'messaging': 'Messaging',
+            'timeline': 'Timeline',
+            'mobile': 'Mobile App',
+            'mobile-incidents': 'Mobile Incidents',
+            'mobile-messaging': 'Mobile Messaging',
+            'mobile-evacuation': 'Mobile Evacuation',
+            'additional-modules': 'Additional Modules'
+        };
+        
+        function updateActiveSection() {
+            const scrollPos = window.scrollY + 200;
+            
+            let currentSection = null;
+            sections.forEach(section => {
+                if (section.offsetTop <= scrollPos) {
+                    currentSection = section;
+                }
+            });
+            
+            if (currentSection) {
+                // Update nav links
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === '#' + currentSection.id) {
+                        link.classList.add('active');
+                    }
+                });
+                
+                // Update current section display
+                const sectionName = sectionNames[currentSection.id] || currentSection.id;
+                currentSectionDisplay.textContent = sectionName;
+            }
+        }
+        
+        window.addEventListener('scroll', updateActiveSection);
+        window.addEventListener('load', updateActiveSection);
+        
+        // Smooth scroll for nav links
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                const target = document.getElementById(targetId);
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 150,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
