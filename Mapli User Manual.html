@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapli User Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { jakarta: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'] },
+                    colors: {
+                        brand: { 50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',300:'#93c5fd',400:'#60a5fa',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a' },
+                        sidebar: { DEFAULT:'#0f172a', light:'#1e293b', lighter:'#334155' },
+                        surface: { DEFAULT:'#f8fafc', card:'#ffffff', border:'#e2e8f0' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; }
+        body { font-family:'Plus Jakarta Sans',system-ui,sans-serif; background:#f8fafc; color:#1e293b; }
+
+        /* ---- Progress bar ---- */
+        #reading-progress { position:fixed; top:0; left:0; height:3px; background:linear-gradient(90deg,#2563eb,#60a5fa); z-index:9999; transition:width .15s linear; width:0; }
+
+        /* ---- Sidebar ---- */
+        #sidebar { width:280px; position:fixed; top:0; left:0; bottom:0; background:#0f172a; z-index:1000; display:flex; flex-direction:column; transition:transform .3s cubic-bezier(.4,0,.2,1); }
+        #sidebar-nav { flex:1; overflow-y:auto; scrollbar-width:thin; scrollbar-color:#334155 transparent; }
+        #sidebar-nav::-webkit-scrollbar { width:4px; }
+        #sidebar-nav::-webkit-scrollbar-track { background:transparent; }
+        #sidebar-nav::-webkit-scrollbar-thumb { background:#334155; border-radius:4px; }
+
+        .nav-group-title { font-size:.65rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#64748b; padding:.75rem 1.25rem .375rem; user-select:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between; transition:color .2s; }
+        .nav-group-title:hover { color:#94a3b8; }
+        .nav-group-title svg { width:14px; height:14px; transition:transform .25s; }
+        .nav-group-title.collapsed svg { transform:rotate(-90deg); }
+        .nav-group-items { overflow:hidden; transition:max-height .35s cubic-bezier(.4,0,.2,1), opacity .25s; max-height:800px; opacity:1; }
+        .nav-group-items.collapsed { max-height:0; opacity:0; }
+
+        .nav-item { display:flex; align-items:center; gap:.625rem; padding:.5rem 1.25rem; font-size:.8125rem; color:#94a3b8; text-decoration:none; transition:all .2s; border-left:2px solid transparent; cursor:pointer; position:relative; }
+        .nav-item:hover { color:#e2e8f0; background:rgba(255,255,255,.04); }
+        .nav-item.active { color:#ffffff; background:rgba(37,99,235,.12); border-left-color:#2563eb; }
+        .nav-item .nav-icon { width:18px; height:18px; flex-shrink:0; opacity:.6; }
+        .nav-item.active .nav-icon { opacity:1; }
+
+        /* ---- Main content ---- */
+        #main-content { margin-left:280px; min-height:100vh; }
+        .content-header { position:sticky; top:0; z-index:100; background:rgba(248,250,252,.85); backdrop-filter:blur(12px); border-bottom:1px solid #e2e8f0; padding:.75rem 2.5rem; display:flex; align-items:center; justify-content:space-between; }
+        .breadcrumb { font-size:.8125rem; color:#64748b; display:flex; align-items:center; gap:.375rem; }
+        .breadcrumb span { color:#2563eb; font-weight:600; }
+        .content-body { padding:2rem 2.5rem 4rem; max-width:1200px; }
+
+        /* ---- Sections ---- */
+        .doc-section { margin-bottom:3rem; opacity:0; transform:translateY(24px); transition:opacity .6s cubic-bezier(.4,0,.2,1), transform .6s cubic-bezier(.4,0,.2,1); }
+        .doc-section.visible { opacity:1; transform:translateY(0); }
+        .section-card { background:#fff; border-radius:16px; border:1px solid #e2e8f0; padding:2.5rem; box-shadow:0 1px 3px rgba(0,0,0,.04); transition:box-shadow .3s, transform .3s; }
+        .section-card:hover { box-shadow:0 8px 30px rgba(0,0,0,.06); }
+
+        .section-title { font-size:1.75rem; font-weight:800; color:#0f172a; margin-bottom:.375rem; display:flex; align-items:center; gap:.75rem; letter-spacing:-.02em; }
+        .section-title .title-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.125rem; flex-shrink:0; }
+        .section-divider { height:3px; width:48px; background:linear-gradient(90deg,#2563eb,#60a5fa); border-radius:3px; margin-bottom:1.75rem; }
+
+        h3.subsection { font-size:1.25rem; font-weight:700; color:#0f172a; margin:2rem 0 .875rem; letter-spacing:-.01em; }
+        h4.sub-subsection { font-size:1.0625rem; font-weight:600; color:#334155; margin:1.5rem 0 .75rem; }
+
+        /* ---- Content grid (text + video) ---- */
+        .content-grid { display:grid; grid-template-columns:1fr 380px; gap:2rem; align-items:start; margin:1.5rem 0; }
+        .video-col { position:sticky; top:80px; }
+
+        /* ---- Video panels ---- */
+        .video-card { position:relative; border-radius:12px; overflow:hidden; background:#000; cursor:pointer; aspect-ratio:16/9; box-shadow:0 4px 20px rgba(0,0,0,.15); transition:transform .35s cubic-bezier(.4,0,.2,1), box-shadow .35s; }
+        .video-card:hover { transform:translateY(-4px) scale(1.01); box-shadow:0 12px 40px rgba(0,0,0,.25); }
+        .video-card video { width:100%; height:100%; object-fit:cover; pointer-events:none; }
+        .video-overlay { position:absolute; inset:0; background:linear-gradient(135deg,rgba(15,23,42,.5),rgba(37,99,235,.3)); display:flex; align-items:center; justify-content:center; transition:background .3s; }
+        .video-card:hover .video-overlay { background:linear-gradient(135deg,rgba(15,23,42,.35),rgba(37,99,235,.2)); }
+        .play-btn { width:56px; height:56px; background:rgba(255,255,255,.95); border-radius:50%; display:flex; align-items:center; justify-content:center; transition:transform .25s, box-shadow .25s; box-shadow:0 4px 20px rgba(0,0,0,.2); }
+        .video-card:hover .play-btn { transform:scale(1.12); box-shadow:0 6px 30px rgba(0,0,0,.3); }
+        .play-btn::after { content:''; width:0; height:0; border-left:18px solid #2563eb; border-top:11px solid transparent; border-bottom:11px solid transparent; margin-left:3px; }
+        .video-tag { position:absolute; bottom:10px; left:10px; background:rgba(0,0,0,.65); backdrop-filter:blur(4px); color:#fff; padding:.25rem .625rem; border-radius:6px; font-size:.6875rem; font-weight:500; }
+
+        /* ---- Steps ---- */
+        .steps-container { background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:1.5rem 1.5rem 1.5rem 2.5rem; margin:1rem 0; }
+        .step-item { position:relative; padding:0 0 1.25rem 2rem; }
+        .step-item:last-child { padding-bottom:0; }
+        .step-item::before { content:''; position:absolute; left:11px; top:28px; bottom:0; width:2px; background:#e2e8f0; }
+        .step-item:last-child::before { display:none; }
+        .step-num { position:absolute; left:0; top:2px; width:24px; height:24px; background:#2563eb; color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.75rem; font-weight:700; flex-shrink:0; box-shadow:0 2px 8px rgba(37,99,235,.3); }
+        .step-text { font-size:.9375rem; color:#334155; line-height:1.6; }
+
+        /* ---- Alert boxes ---- */
+        .alert-box { border-radius:10px; padding:1rem 1.25rem; margin:1rem 0; display:flex; gap:.75rem; align-items:flex-start; font-size:.9375rem; }
+        .alert-box.success { background:#ecfdf5; border:1px solid #a7f3d0; color:#065f46; }
+        .alert-box.info { background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af; }
+        .alert-box.warning { background:#fffbeb; border:1px solid #fde68a; color:#92400e; }
+        .alert-box .alert-icon { width:20px; height:20px; flex-shrink:0; margin-top:1px; }
+
+        /* ---- Tables ---- */
+        .doc-table { width:100%; border-collapse:separate; border-spacing:0; margin:1rem 0; border-radius:10px; overflow:hidden; border:1px solid #e2e8f0; font-size:.9375rem; }
+        .doc-table th { background:#f1f5f9; font-weight:600; color:#0f172a; text-align:left; padding:.75rem 1rem; border-bottom:2px solid #e2e8f0; }
+        .doc-table td { padding:.75rem 1rem; border-bottom:1px solid #f1f5f9; color:#334155; }
+        .doc-table tr:nth-child(even) td { background:#fafbfc; }
+        .doc-table tr:hover td { background:#eff6ff; }
+        .doc-table tr:last-child td { border-bottom:none; }
+
+        /* ---- Feature grid ---- */
+        .feature-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:1rem; margin:1rem 0; }
+        .feature-card { background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:1.25rem; transition:transform .25s, box-shadow .25s, border-color .25s; cursor:default; }
+        .feature-card:hover { transform:translateY(-3px); box-shadow:0 8px 25px rgba(0,0,0,.06); border-color:#bfdbfe; }
+        .feature-card h4 { font-size:.9375rem; font-weight:700; color:#0f172a; margin-bottom:.375rem; }
+        .feature-card p { font-size:.8125rem; color:#64748b; line-height:1.5; }
+
+        /* ---- Lists ---- */
+        .doc-list { margin:.75rem 0; padding-left:0; list-style:none; }
+        .doc-list li { position:relative; padding:.375rem 0 .375rem 1.5rem; font-size:.9375rem; color:#334155; }
+        .doc-list li::before { content:''; position:absolute; left:0; top:.75rem; width:6px; height:6px; background:#2563eb; border-radius:50%; }
+        .doc-list.nested { padding-left:1.25rem; }
+        .doc-list.nested li::before { background:#94a3b8; width:5px; height:5px; }
+
+        /* ---- Separator ---- */
+        .section-sep { border:none; border-top:1px solid #e2e8f0; margin:2rem 0; }
+
+        /* ---- Back to top ---- */
+        #back-to-top { position:fixed; bottom:2rem; right:2rem; width:44px; height:44px; background:#2563eb; color:#fff; border:none; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 15px rgba(37,99,235,.35); opacity:0; transform:translateY(16px); transition:opacity .3s, transform .3s, background .2s; z-index:999; }
+        #back-to-top.visible { opacity:1; transform:translateY(0); }
+        #back-to-top:hover { background:#1d4ed8; transform:translateY(-2px); }
+
+        /* ---- Modal ---- */
+        .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.9); z-index:9000; align-items:center; justify-content:center; padding:2rem; }
+        .modal.active { display:flex; }
+        .modal-inner { position:relative; width:100%; max-width:1000px; aspect-ratio:16/9; background:#000; border-radius:12px; overflow:hidden; }
+        .modal-inner video { width:100%; height:100%; }
+        .modal-close { position:absolute; top:-48px; right:0; background:none; border:none; color:#fff; font-size:2rem; cursor:pointer; padding:.5rem; transition:color .2s; }
+        .modal-close:hover { color:#60a5fa; }
+
+        /* ---- Hamburger ---- */
+        #hamburger { display:none; position:fixed; top:.875rem; left:.875rem; z-index:1100; width:40px; height:40px; background:#0f172a; border:none; border-radius:10px; cursor:pointer; flex-direction:column; align-items:center; justify-content:center; gap:5px; box-shadow:0 2px 10px rgba(0,0,0,.15); }
+        #hamburger span { display:block; width:18px; height:2px; background:#fff; border-radius:2px; transition:all .25s; }
+        #hamburger.open span:nth-child(1) { transform:rotate(45deg) translate(2.5px,2.5px); }
+        #hamburger.open span:nth-child(2) { opacity:0; }
+        #hamburger.open span:nth-child(3) { transform:rotate(-45deg) translate(2.5px,-2.5px); }
+        #sidebar-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:999; }
+
+        /* ---- Search ---- */
+        .sidebar-search { padding:.75rem 1rem; position:relative; }
+        .sidebar-search input { width:100%; background:#1e293b; border:1px solid #334155; border-radius:8px; padding:.5rem .75rem .5rem 2.25rem; color:#e2e8f0; font-size:.8125rem; outline:none; transition:border-color .2s, box-shadow .2s; font-family:inherit; }
+        .sidebar-search input::placeholder { color:#64748b; }
+        .sidebar-search input:focus { border-color:#2563eb; box-shadow:0 0 0 3px rgba(37,99,235,.15); }
+        .sidebar-search svg { position:absolute; left:1.625rem; top:50%; transform:translateY(-50%); width:14px; height:14px; color:#64748b; pointer-events:none; }
+
+        /* ---- Responsive ---- */
+        @media (max-width:1024px) {
+            .content-grid { grid-template-columns:1fr; }
+            .video-col { position:relative; top:0; }
+        }
+        @media (max-width:768px) {
+            #sidebar { transform:translateX(-100%); z-index:1100; }
+            #sidebar.open { transform:translateX(0); }
+            #sidebar-backdrop.open { display:block; }
+            #main-content { margin-left:0; }
+            #hamburger { display:flex; }
+            .content-header { padding:.75rem 1rem .75rem 3.5rem; }
+            .content-body { padding:1.5rem 1rem 3rem; }
+            .section-card { padding:1.5rem; border-radius:12px; }
+            .section-title { font-size:1.375rem; }
+        }
+
+        /* ---- Print ---- */
+        @media print {
+            #sidebar, #hamburger, #back-to-top, #reading-progress, .content-header, .video-card, .modal { display:none !important; }
+            #main-content { margin-left:0 !important; }
+            .doc-section { opacity:1 !important; transform:none !important; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Reading progress -->
+    <div id="reading-progress"></div>
+
+    <!-- Hamburger (mobile) -->
+    <button id="hamburger" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    <div id="sidebar-backdrop"></div>
+
+    <!-- ========== SIDEBAR ========== -->
+    <aside id="sidebar">
+        <!-- Logo -->
+        <div class="flex items-center gap-2.5 px-5 py-5 border-b border-white/[.08]">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="14" fill="#2563eb"/><path d="M14 7a5 5 0 0 1 5 5c0 3.5-5 9-5 9s-5-5.5-5-9a5 5 0 0 1 5-5z" fill="#fff"/><circle cx="14" cy="12" r="2" fill="#2563eb"/></svg>
+            <div>
+                <span class="text-white font-extrabold text-lg tracking-tight">Mapli</span>
+                <span class="block text-[.6rem] text-slate-500 font-medium tracking-wide uppercase">User Guide</span>
+            </div>
+        </div>
+
+        <!-- Search -->
+        <div class="sidebar-search">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd"/></svg>
+            <input type="text" id="sidebar-search" placeholder="Search sections..." autocomplete="off">
+        </div>
+
+        <!-- Navigation -->
+        <nav id="sidebar-nav">
+            <!-- Web Platform -->
+            <div class="nav-group" data-group="web">
+                <div class="nav-group-title" onclick="toggleGroup(this)">
+                    Web Platform
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+                </div>
+                <div class="nav-group-items">
+                    <a href="#module1" class="nav-item" data-section="module1">
+                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z"/></svg>
+                        Platform Overview
+                    </a>
+                    <a href="#module2" class="nav-item" data-section="module2">
+                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75z" clip-rule="evenodd"/></svg>
+                        Plan Event
+                    </a>
+                    <a href="#groups-users" class="nav-item" data-section="groups-users">
+                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M7 8a3 3 0 100-6 3 3 0 000 6zM14.5 9a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM1.615 16.428a1.224 1.224 0 01-.569-1.175 6.002 6.002 0 0111.908 0c.058.467-.172.92-.57 1.174A9.953 9.953 0 017 18a9.953 9.953 0 01-5.385-1.572zM14.5 16h-.106c.07-.297.088-.611.048-.933a7.47 7.47 0 00-1.588-3.755 4.502 4.502 0 015.874 2.636.818.818 0 01-.36.98A7.465 7.465 0 0114.5 16z"/></svg>
+                        Groups & Users
+                    </a>
+                    <a href="#devices" class="nav-item" data-section="devices">
+                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M13 4.5a2.5 2.5 0 11.702 1.737L6.97 9.604a2.5 2.5 0 110 .792l6.733 3.367a2.5 2.5 0 11-.67 1.341L6.3 11.737a2.5 2.5 0 010-3.474l6.733-3.367A2.494 2.494 0 0113 4.5z"/></svg>
+                        Devices
+                    </a>
+                    <a href="#media-sources" class="nav-item" data-section="media-sources">
+                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M3.25 4A2.25 2.25 0 001 6.25v7.5A2.25 2.25 0 003.25 16h7.5A2.25 2.25 0 0013 13.75v-7.5A2.25 2.25 0 0010.75 4h-7.5zM19 4.75a.75.75 0 00-1.28-.53l-3 3a.75.75 0 00-.22.53v4.5c0 .199.079.39.22.53l3 3a.75.75 0 001.28-.53V4.75z"/></svg>
+                        Media Sources
+                    </a>
+                    <a href="#zones-sectors" class="nav-item" data-section="zones-sectors">
+                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.157 2.175a1.5 1.5 0 00-1.147 0l-4.084 1.69A1.5 1.5 0 002 5.251v10.877a.75.75 0 001.074.676l3.502-1.69 4.007 1.671a1.5 1.5 0 001.147 0l3.344-1.39a.75.75 0 000-1.378l-3.344-1.39a1.5 1.5 0 00-1.147 0L7.08 14.218l-3.58 1.73V5.25l4.084-1.69 4.007 1.671a1.5 1.5 0 001.147 0l3.344-1.39a.75.75 0 000-1.378l-3.344-1.39a1.5 1.5 0 00-1.147 0L8.157 2.175z" clip-rule="evenodd"/></svg>
+                        Zones & Sectors
+                    </a>
+                    <a href="#tasks" class="nav-item" data-section="tasks">
+                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M2.5 3A1.5 1.5 0 001 4.5v4A1.5 1.5 0 002.5 10h6A1.5 1.5 0 0010 8.5v-4A1.5 1.5 0 008.5 3h-6zm11 2A1.5 1.5 0 0012 6.5v7a1.5 1.5 0 001.5 1.5h4a1.5 1.5 0 001.5-1.5v-7A1.5 1.5 0 0017.5 5h-4zm-10 7A1.5 1.5 0 002 13.5v2A1.5 1.5 0 003.5 17h5A1.5 1.5 0 0010 15.5v-2A1.5 1.5 0 008.5 12h-5z" clip-rule="evenodd"/></svg>
+                        Tasks
+                    </a>
+                    <a href="#event-plan" class="nav-item" data-section="event-plan">
+                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.5 2A1.5 1.5 0 003 3.5v13A1.5 1.5 0 004.5 18h11a1.5 1.5 0 001.5-1.5V7.621a1.5 1.5 0 00-.44-1.06l-4.12-4.122A1.5 1.5 0 0011.378 2H4.5zm2.25 8.5a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-6.5zm0 3a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-6.5z" clip-rule="evenodd"/></svg>
+                        Event Plan
+                    </a>
+                    <a href="#evacuation" class="nav-item" data-section="evacuation">
+                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>
+                        Evacuation
+                    </a>
+                    <a href="#incidents" class="nav-item" data-section="incidents">
+                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M2.22 2.22a.75.75 0 011.06 0l4.46 4.46h.06l6.98-3.99A.75.75 0 0116 3.377V5.22l1.72-1.72a.75.75 0 011.06 1.06L2.22 21.12a.75.75 0 01-1.06-1.06l3-3H2.75a.75.75 0 01-.75-.75v-3.5a.75.75 0 01.35-.637l5.657-3.56z"/></svg>
+                        Incidents
+                    </a>
+                    <a href="#activity-log" class="nav-item" data-section="activity-log">
+                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 2a6 6 0 00-6 6c0 1.887-.454 3.665-1.257 5.234a.75.75 0 00.515 1.076 32.91 32.91 0 003.256.508 3.5 3.5 0 006.972 0 32.903 32.903 0 003.256-.508.75.75 0 00.515-1.076A11.448 11.448 0 0116 8a6 6 0 00-6-6zm0 14.5a2 2 0 01-1.95-1.557 33.54 33.54 0 003.9 0A2 2 0 0110 16.5z" clip-rule="evenodd"/></svg>
+                        Activity Log
+                    </a>
+                    <a href="#realtime-locations" class="nav-item" data-section="realtime-locations">
+                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.145c.186-.1.429-.241.71-.424.56-.366 1.301-.904 2.044-1.617C14.77 15.372 16.5 13 16.5 10a6.5 6.5 0 10-13 0c0 3 1.73 5.372 3.13 6.736.744.713 1.484 1.251 2.045 1.617a13.6 13.6 0 00.99.57l.019.007.006.003zM10 11.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" clip-rule="evenodd"/></svg>
+                        Real-Time Locations
+                    </a>
+                    <a href="#tasks-review" class="nav-item" data-section="tasks-review">
+                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M15.988 3.012A2.25 2.25 0 0118 5.25v6.5A2.25 2.25 0 0115.75 14H13.5V7A2.5 2.5 0 0011 4.5H8.128a2.252 2.252 0 011.884-1.488A2.25 2.25 0 0112.25 1h1.5a2.25 2.25 0 012.238 2.012zM11.5 3.25a.75.75 0 01.75-.75h1.5a.75.75 0 01.75.75v.25h-3v-.25z" clip-rule="evenodd"/><path fill-rule="evenodd" d="M2 7a1 1 0 011-1h8a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V7zm2 3.25a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5a.75.75 0 01-.75-.75zm0 3.5a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5a.75.75 0 01-.75-.75z" clip-rule="evenodd"/></svg>
+                        Tasks Review
+                    </a>
+                    <a href="#messaging" class="nav-item" data-section="messaging">
+                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.43 2.524A41.29 41.29 0 0110 2c2.236 0 4.43.18 6.57.524 1.437.231 2.43 1.49 2.43 2.902v5.148c0 1.413-.993 2.67-2.43 2.902a41.102 41.102 0 01-3.55.414c-.28.02-.521.18-.643.413l-1.712 3.293a.75.75 0 01-1.33 0l-1.713-3.293a.783.783 0 00-.642-.413 41.108 41.108 0 01-3.55-.414C1.993 13.245 1 11.986 1 10.574V5.426c0-1.413.993-2.67 2.43-2.902z" clip-rule="evenodd"/></svg>
+                        Messaging
+                    </a>
+                    <a href="#timeline" class="nav-item" data-section="timeline">
+                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd"/></svg>
+                        Timeline
+                    </a>
+                </div>
+            </div>
+
+            <!-- Mobile App -->
+            <div class="nav-group" data-group="mobile">
+                <div class="nav-group-title" onclick="toggleGroup(this)">
+                    Mobile App
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+                </div>
+                <div class="nav-group-items">
+                    <a href="#mobile" class="nav-item" data-section="mobile">
+                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M8 16.25a.75.75 0 01.75-.75h2.5a.75.75 0 010 1.5h-2.5a.75.75 0 01-.75-.75z"/><path fill-rule="evenodd" d="M4 4a3 3 0 013-3h6a3 3 0 013 3v12a3 3 0 01-3 3H7a3 3 0 01-3-3V4zm3-1.5A1.5 1.5 0 005.5 4v12A1.5 1.5 0 007 17.5h6a1.5 1.5 0 001.5-1.5V4A1.5 1.5 0 0013 2.5H7z" clip-rule="evenodd"/></svg>
+                        Execute Event
+                    </a>
+                    <a href="#mobile-incidents" class="nav-item" data-section="mobile-incidents">
+                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>
+                        Incidents
+                    </a>
+                    <a href="#mobile-messaging" class="nav-item" data-section="mobile-messaging">
+                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.43 2.524A41.29 41.29 0 0110 2c2.236 0 4.43.18 6.57.524 1.437.231 2.43 1.49 2.43 2.902v5.148c0 1.413-.993 2.67-2.43 2.902a41.102 41.102 0 01-3.55.414c-.28.02-.521.18-.643.413l-1.712 3.293a.75.75 0 01-1.33 0l-1.713-3.293a.783.783 0 00-.642-.413 41.108 41.108 0 01-3.55-.414C1.993 13.245 1 11.986 1 10.574V5.426c0-1.413.993-2.67 2.43-2.902z" clip-rule="evenodd"/></svg>
+                        Messaging
+                    </a>
+                    <a href="#mobile-evacuation" class="nav-item" data-section="mobile-evacuation">
+                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 3.75a2 2 0 10-4 0 2 2 0 004 0zM17.25 11.5a.75.75 0 000-1.5h-4l-1.553-2.486A2.25 2.25 0 009.788 6.5H8.052a2.25 2.25 0 00-1.905 1.053L3.56 12.197a.75.75 0 001.267.806L6.782 9.8l1.693 4.233-2.647 4.94a.75.75 0 001.325.71L10 14.618l2.848 5.065a.75.75 0 001.324-.71l-2.647-4.94 1.218-3.044L14.25 11.5h3z"/></svg>
+                        Evacuation
+                    </a>
+                </div>
+            </div>
+
+            <!-- Other -->
+            <div class="nav-group" data-group="other">
+                <div class="nav-group-title" onclick="toggleGroup(this)">
+                    Other
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+                </div>
+                <div class="nav-group-items">
+                    <a href="#additional-modules" class="nav-item" data-section="additional-modules">
+                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 16.82A7.462 7.462 0 0115 15.5c.71 0 1.396.098 2.046.282A.75.75 0 0018 15.06V3.94a.75.75 0 00-.546-.722A9.006 9.006 0 0015 2.8a8.96 8.96 0 00-4.25 1.063v12.958zM9.25 4.863A8.96 8.96 0 005 3.8a9.006 9.006 0 00-2.454.418A.75.75 0 002 4.94v11.12a.75.75 0 00.954.722A7.462 7.462 0 015 16.5a7.46 7.46 0 014.25 1.32V4.863z"/></svg>
+                        Additional Modules
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Sidebar footer -->
+        <div class="px-5 py-3 border-t border-white/[.08] text-[.6875rem] text-slate-600">
+            v2.0 &middot; Updated 2025
+        </div>
+    </aside>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <div id="main-content">
+        <!-- Sticky header bar -->
+        <div class="content-header">
+            <div class="breadcrumb">
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" class="text-slate-400"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>
+                User Guide &nbsp;/&nbsp; <span id="breadcrumb-section">Platform Overview</span>
+            </div>
+            <div class="flex items-center gap-3 text-xs text-slate-500">
+                <span id="progress-text">0%</span>
+                <div class="w-24 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                    <div id="progress-bar-mini" class="h-full bg-brand-600 rounded-full transition-all duration-300" style="width:0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content body -->
+        <div class="content-body">
+
+            <!-- ==================== MODULE 1 ==================== -->
+            <div class="doc-section" id="module1">
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="title-icon bg-blue-100 text-blue-600">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z"/></svg>
+                        </div>
+                        Module 1: Platform Overview And Navigation
+                    </div>
+                    <div class="section-divider"></div>
+
+                    <h3 class="subsection">1. Layout Overview</h3>
+
+                    <h4 class="sub-subsection">Top Bar</h4>
+                    <ul class="doc-list">
+                        <li><strong>Events Dropdown:</strong> Displays the currently active event. You can switch between events from this menu.</li>
+                        <li><strong>Search Bar:</strong> Used to find specific addresses or locations on the map. Type any address to quickly navigate there.</li>
+                        <li><strong>View Selector:</strong>
+                            <ul class="doc-list nested">
+                                <li><strong>Map:</strong> Displays the main interactive map view.</li>
+                                <li><strong>Control Room:</strong> Alternative view for monitoring.</li>
+                            </ul>
+                        </li>
+                        <li><strong>User & Notifications (top-right):</strong>
+                            <ul class="doc-list nested">
+                                <li>Notification bell shows new notifications.</li>
+                                <li>Settings icon opens user preferences and system configuration.</li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <h3 class="subsection">2. Left Sidebar Menu</h3>
+                    <p class="text-slate-600 text-[.9375rem] mb-3">The left menu provides access to all operational layers of the system:</p>
+
+                    <table class="doc-table">
+                        <thead>
+                            <tr><th>Menu</th><th>Description</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Info</td><td>Displays general information of event details.</td></tr>
+                            <tr><td>Layers</td><td>Controls visibility of map elements (groups, structures, incidents, tasks, areas, evacuation routes).</td></tr>
+                            <tr><td>Tasks</td><td>Lists and manages all created tasks. You can view, edit, or add new ones.</td></tr>
+                            <tr><td>Incidents</td><td>Shows current and past incidents on the map. Each incident is represented by a marker.</td></tr>
+                            <tr><td>Units</td><td>Displays available units (users) and their status.</td></tr>
+                            <tr><td>Messages</td><td>Opens the messaging panel for communication.</td></tr>
+                            <tr><td>Evacuation</td><td>Provides tool for creating or managing evacuation routes.</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3 class="subsection">3. Map Elements</h3>
+                    <ul class="doc-list">
+                        <li><strong>Sync button:</strong> Import all cameras from FlexControl Registry.</li>
+                        <li><strong>Monitor button:</strong> Copies map to clipboard.</li>
+                        <li><strong>Home button:</strong> Centers the event on the map.</li>
+                        <li><strong>Ruler button:</strong> Measure distance on the map.</li>
+                        <li><strong>Zoom in/out buttons:</strong> Zoom the map.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ==================== MODULE 2 ==================== -->
+            <div class="doc-section" id="module2">
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="title-icon bg-indigo-100 text-indigo-600">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75z" clip-rule="evenodd"/></svg>
+                        </div>
+                        Module 2: Plan and Manage A Large Outdoor Event
+                    </div>
+                    <div class="section-divider"></div>
+
+                    <!-- Create Event -->
+                    <div class="content-grid">
+                        <div>
+                            <h3 class="subsection">Plan Event</h3>
+                            <h4 class="sub-subsection" id="create-event">Create Operation (Event) from Scratch</h4>
+
+                            <p class="text-slate-600 text-[.9375rem] mb-2"><strong>Accessing Event Creation:</strong></p>
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text">From the main navigation, go to <strong>Platform Settings &rarr; Events</strong>.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">Click the <strong>New Item</strong> button located at the top of the Events list.</div></div>
+                                <div class="step-item"><div class="step-num">3</div><div class="step-text">The Event Creation screen will open.</div></div>
+                            </div>
+
+                            <p class="text-slate-600 text-[.9375rem] mt-4 mb-2"><strong>Event Details (Left Panel):</strong></p>
+                            <p class="text-slate-600 text-[.9375rem] mb-2">Use the panel on the left side of the screen to define the core details of your event:</p>
+                            <ul class="doc-list">
+                                <li><strong>Event Name</strong> &ndash; Enter a clear, descriptive title for your event.</li>
+                                <li><strong>Description</strong> &ndash; Provide any relevant details, objectives, or notes.</li>
+                                <li><strong>Start and End Date</strong> &ndash; Set the time frame during which the event will be active.</li>
+                                <li><strong>Groups</strong> &ndash; Assign existing groups that will participate in or oversee the event.</li>
+                                <li><strong>Users</strong> &ndash; Add individual users who will take part or have monitoring responsibilities.</li>
+                                <li><strong>Devices</strong> &ndash; Include devices (e.g., GPS trackers, drones) that will be used during the event.</li>
+                            </ul>
+
+                            <p class="text-slate-600 text-[.9375rem] mt-4 mb-2"><strong>Map Tools:</strong></p>
+                            <p class="text-slate-600 text-[.9375rem] mb-2">The right side of the screen contains an interactive map where you can define the geographical aspects of your event:</p>
+                            <ul class="doc-list">
+                                <li><strong>Draw Sectors</strong> &ndash; Define specific areas where activities or monitoring will take place.</li>
+                                <li><strong>Draw Lines</strong> &ndash; Mark paths or patrol routes relevant to event operations.</li>
+                                <li><strong>Place Points</strong> &ndash; Pinpoint specific locations of interest such as checkpoints or observation posts.</li>
+                            </ul>
+
+                            <div class="alert-box success">
+                                <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/></svg>
+                                <div><strong>Result:</strong> Once all details and map elements are configured, click <strong>Save</strong> to finalize event creation. Your new event will appear in the Events list.</div>
+                            </div>
+                        </div>
+                        <div class="video-col">
+                            <div class="video-card" onclick="openVideoWindow('videos/video_01.mp4')" role="button" tabindex="0">
+                                <video src="videos/video_01.mp4" preload="metadata"></video>
+                                <div class="video-overlay"><div class="play-btn"></div></div>
+                                <div class="video-tag">Click to expand</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="section-sep">
+
+                    <!-- Create Template -->
+                    <div class="content-grid">
+                        <div>
+                            <h4 class="sub-subsection" id="create-template">Create Template from Scratch</h4>
+                            <p class="text-slate-600 text-[.9375rem] mb-3">Event templates allow you to predefine and store event configurations that can be reused later to create new events quickly and consistently.</p>
+
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text">From the main navigation, go to <strong>Platform Settings &rarr; Events</strong>.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">Open the <strong>Event Templates</strong> tab at the top of the page.</div></div>
+                                <div class="step-item"><div class="step-num">3</div><div class="step-text">Click the <strong>New Item</strong> button to start creating a new template.</div></div>
+                            </div>
+
+                            <p class="text-slate-600 text-[.9375rem] mt-4 mb-2"><strong>Template Configuration:</strong></p>
+                            <ul class="doc-list">
+                                <li><strong>Template Name</strong> &ndash; Enter a descriptive name for the template.</li>
+                                <li><strong>Description</strong> &ndash; Add notes or context about the template's purpose.</li>
+                                <li><strong>Groups</strong> &ndash; Add one or more groups that will be linked to this template.</li>
+                                <li>On the map area, you can add Points, Lines, and Sectors.</li>
+                            </ul>
+                        </div>
+                        <div class="video-col">
+                            <div class="video-card" onclick="openVideoWindow('videos/TemplateCreation.mp4')" role="button" tabindex="0">
+                                <video src="videos/TemplateCreation.mp4" preload="metadata"></video>
+                                <div class="video-overlay"><div class="play-btn"></div></div>
+                                <div class="video-tag">Click to expand</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="section-sep">
+
+                    <!-- Event from Template -->
+                    <div class="content-grid">
+                        <div>
+                            <h4 class="sub-subsection">Create Operation (Event) from Template</h4>
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text">Go to <strong>Platform Settings &rarr; Events &rarr; Event Templates</strong> tab.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">Click on the eye icon to open the template.</div></div>
+                                <div class="step-item"><div class="step-num">3</div><div class="step-text">Click the Info button on the left side, then click the plus (+) icon to create an event.</div></div>
+                                <div class="step-item"><div class="step-num">4</div><div class="step-text">Enter Event Name, Start Date, and End Date, then click <strong>Create</strong>.</div></div>
+                            </div>
+                        </div>
+                        <div class="video-col">
+                            <div class="video-card" onclick="openVideoWindow('videos/EventCreationFromTemplate.mp4')" role="button" tabindex="0">
+                                <video src="videos/EventCreationFromTemplate.mp4" preload="metadata"></video>
+                                <div class="video-overlay"><div class="play-btn"></div></div>
+                                <div class="video-tag">Click to expand</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="section-sep">
+
+                    <!-- Template from Event -->
+                    <div class="content-grid">
+                        <div>
+                            <h4 class="sub-subsection">Create Template from Existing Operation</h4>
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text">Go to <strong>Platform Settings &rarr; Events</strong> and locate the event.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">Click the eye button, then click Info on the left-side panel.</div></div>
+                                <div class="step-item"><div class="step-num">3</div><div class="step-text">Click the burger menu and select "Create Template from This Event".</div></div>
+                                <div class="step-item"><div class="step-num">4</div><div class="step-text">Edit the Template Name and dates, optionally include tasks, then click <strong>Create</strong>.</div></div>
+                            </div>
+                        </div>
+                        <div class="video-col">
+                            <div class="video-card" onclick="openVideoWindow('videos/CreateTemplateFromEvent.mp4')" role="button" tabindex="0">
+                                <video src="videos/CreateTemplateFromEvent.mp4" preload="metadata"></video>
+                                <div class="video-overlay"><div class="play-btn"></div></div>
+                                <div class="video-tag">Click to expand</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== GROUPS & USERS ==================== -->
+            <div class="doc-section" id="groups-users">
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="title-icon bg-violet-100 text-violet-600">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M7 8a3 3 0 100-6 3 3 0 000 6zM14.5 9a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM1.615 16.428a1.224 1.224 0 01-.569-1.175 6.002 6.002 0 0111.908 0c.058.467-.172.92-.57 1.174A9.953 9.953 0 017 18a9.953 9.953 0 01-5.385-1.572zM14.5 16h-.106c.07-.297.088-.611.048-.933a7.47 7.47 0 00-1.588-3.755 4.502 4.502 0 015.874 2.636.818.818 0 01-.36.98A7.465 7.465 0 0114.5 16z"/></svg>
+                        </div>
+                        Create Groups and Users
+                    </div>
+                    <div class="section-divider"></div>
+
+                    <div class="content-grid">
+                        <div>
+                            <p class="text-slate-600 text-[.9375rem] mb-3">In the Settings section, administrators can manage all system entities such as Groups, Users, Roles, Events, Devices, Media Sources, and Icons.</p>
+
+                            <h3 class="subsection">Create a New Group</h3>
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text">Navigate to <strong>Settings &rarr; Groups</strong>.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">Click the <strong>New Item</strong> button.</div></div>
+                                <div class="step-item"><div class="step-num">3</div><div class="step-text">Fill in: <strong>Group Name</strong>, <strong>Color</strong>, <strong>Icon</strong>, and optionally assign other groups.</div></div>
+                                <div class="step-item"><div class="step-num">4</div><div class="step-text">Click <strong>Save</strong> to create the group.</div></div>
+                            </div>
+
+                            <h3 class="subsection">Create a New User</h3>
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text">Navigate to <strong>Settings &rarr; Users</strong>.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">Click the <strong>New Item</strong> button.</div></div>
+                                <div class="step-item"><div class="step-num">3</div><div class="step-text">Fill in: Username, Password, Name, Email, Phone Number, Group, and Role.</div></div>
+                                <div class="step-item"><div class="step-num">4</div><div class="step-text">Click <strong>Save</strong> to create the new user.</div></div>
+                            </div>
+
+                            <div class="alert-box info">
+                                <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd"/></svg>
+                                <div><strong>Tip:</strong> You can edit existing users or groups by clicking the Edit icon next to their entry.</div>
+                            </div>
+                        </div>
+                        <div class="video-col">
+                            <div class="video-card" onclick="openVideoWindow('videos/GroupsAndUsers.mp4')" role="button" tabindex="0">
+                                <video src="videos/GroupsAndUsers.mp4" preload="metadata"></video>
+                                <div class="video-overlay"><div class="play-btn"></div></div>
+                                <div class="video-tag">Click to expand</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== DEVICES ==================== -->
+            <div class="doc-section" id="devices">
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="title-icon bg-cyan-100 text-cyan-600">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M13 4.5a2.5 2.5 0 11.702 1.737L6.97 9.604a2.5 2.5 0 110 .792l6.733 3.367a2.5 2.5 0 11-.67 1.341L6.3 11.737a2.5 2.5 0 010-3.474l6.733-3.367A2.494 2.494 0 0113 4.5z"/></svg>
+                        </div>
+                        Devices Management
+                    </div>
+                    <div class="section-divider"></div>
+
+                    <div class="content-grid">
+                        <div>
+                            <p class="text-slate-600 text-[.9375rem] mb-3">The Devices section allows administrators to create and manage hardware devices linked with users or groups inside the event.</p>
+
+                            <h3 class="subsection">Accessing Devices</h3>
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text">In the left panel, click <strong>Settings</strong>.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">Select <strong>Devices</strong> from the submenu.</div></div>
+                                <div class="step-item"><div class="step-num">3</div><div class="step-text">A device management table will appear showing all existing devices.</div></div>
+                            </div>
+
+                            <h3 class="subsection">Creating a New Device</h3>
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text">Click the "New Item" button at the top right of the Devices page.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">Fill in: <strong>Device Title</strong>, <strong>Device ID</strong>, <strong>Icon</strong>, <strong>Media Device</strong>, and <strong>Assign To</strong>.</div></div>
+                                <div class="step-item"><div class="step-num">3</div><div class="step-text">Click <strong>Save</strong>.</div></div>
+                            </div>
+                        </div>
+                        <div class="video-col">
+                            <div class="video-card" onclick="openVideoWindow('videos/DevicesCrud.mp4')" role="button" tabindex="0">
+                                <video src="videos/DevicesCrud.mp4" preload="metadata"></video>
+                                <div class="video-overlay"><div class="play-btn"></div></div>
+                                <div class="video-tag">Click to expand</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== MEDIA SOURCES ==================== -->
+            <div class="doc-section" id="media-sources">
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="title-icon bg-pink-100 text-pink-600">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M3.25 4A2.25 2.25 0 001 6.25v7.5A2.25 2.25 0 003.25 16h7.5A2.25 2.25 0 0013 13.75v-7.5A2.25 2.25 0 0010.75 4h-7.5zM19 4.75a.75.75 0 00-1.28-.53l-3 3a.75.75 0 00-.22.53v4.5c0 .199.079.39.22.53l3 3a.75.75 0 001.28-.53V4.75z"/></svg>
+                        </div>
+                        Media Sources
+                    </div>
+                    <div class="section-divider"></div>
+
+                    <div class="content-grid">
+                        <div>
+                            <p class="text-slate-600 text-[.9375rem] mb-3">The Media Sources module allows administrators to register and manage external video or media streams (e.g., CCTV cameras, ONVIF cameras, push/pull streams).</p>
+
+                            <h3 class="subsection">Creating a New Media Source</h3>
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text">Go to <strong>Settings &rarr; Media Sources</strong>.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">Click "New Item" in the top-right corner.</div></div>
+                                <div class="step-item"><div class="step-num">3</div><div class="step-text">Fill in: <strong>Title</strong>, <strong>Type</strong> (Push/Pull/ONVIF), and <strong>URL</strong>.</div></div>
+                                <div class="step-item"><div class="step-num">4</div><div class="step-text">Click <strong>Save</strong> to finish creating the media source.</div></div>
+                            </div>
+                        </div>
+                        <div class="video-col">
+                            <div class="video-card" onclick="openVideoWindow('videos/MediaSourcesCrud.mp4')" role="button" tabindex="0">
+                                <video src="videos/MediaSourcesCrud.mp4" preload="metadata"></video>
+                                <div class="video-overlay"><div class="play-btn"></div></div>
+                                <div class="video-tag">Click to expand</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== ZONES & SECTORS ==================== -->
+            <div class="doc-section" id="zones-sectors">
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="title-icon bg-emerald-100 text-emerald-600">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.157 2.175a1.5 1.5 0 00-1.147 0l-4.084 1.69A1.5 1.5 0 002 5.251v10.877a.75.75 0 001.074.676l3.502-1.69 4.007 1.671a1.5 1.5 0 001.147 0l3.344-1.39a.75.75 0 000-1.378l-3.344-1.39a1.5 1.5 0 00-1.147 0L7.08 14.218l-3.58 1.73V5.25l4.084-1.69 4.007 1.671a1.5 1.5 0 001.147 0l3.344-1.39a.75.75 0 000-1.378l-3.344-1.39a1.5 1.5 0 00-1.147 0L8.157 2.175z" clip-rule="evenodd"/></svg>
+                        </div>
+                        Draw Zones and Sectors
+                    </div>
+                    <div class="section-divider"></div>
+
+                    <div class="content-grid">
+                        <div>
+                            <h3 class="subsection">Create a Structure on the Map</h3>
+                            <p class="text-slate-600 text-[.9375rem] mb-3">A Structure represents a fixed location or object on the event map — such as a command post, observation point, or an area equipped with devices like drones or beacons.</p>
+
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text">Navigate to the Event Creation screen or open an existing event in Edit Mode.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">On the map toolbar, click the GPS icon to activate structure placement mode.</div></div>
+                                <div class="step-item"><div class="step-num">3</div><div class="step-text">Click on the desired location on the map where you want to place the structure.</div></div>
+                                <div class="step-item"><div class="step-num">4</div><div class="step-text">Configure: <strong>Icon Selection</strong>, <strong>Structure Name</strong>, and attach devices if needed.</div></div>
+                                <div class="step-item"><div class="step-num">5</div><div class="step-text">Click anywhere on the map to save the structure.</div></div>
+                            </div>
+
+                            <h3 class="subsection">Draw a Sector on the Map</h3>
+                            <p class="text-slate-600 text-[.9375rem] mb-3">A Sector represents a defined area on the map — such as a patrol zone, restricted area, or operational region.</p>
+
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text">On the map toolbar, click the <strong>Sector icon</strong> to activate sector drawing mode.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">Start drawing the area by clicking to create each corner point.</div></div>
+                                <div class="step-item"><div class="step-num">3</div><div class="step-text">Click on the last point to close the area.</div></div>
+                                <div class="step-item"><div class="step-num">4</div><div class="step-text">Configure: <strong>Color</strong>, <strong>Title</strong>, <strong>Smoothness</strong>, and <strong>Fill Opacity</strong>.</div></div>
+                                <div class="step-item"><div class="step-num">5</div><div class="step-text">Click anywhere on the map to save the sector.</div></div>
+                            </div>
+                        </div>
+                        <div class="video-col">
+                            <div class="video-card" onclick="openVideoWindow('videos/sectors_lines_points.mp4')" role="button" tabindex="0">
+                                <video src="videos/sectors_lines_points.mp4" preload="metadata"></video>
+                                <div class="video-overlay"><div class="play-btn"></div></div>
+                                <div class="video-tag">Click to expand</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="section-sep">
+
+                    <div class="content-grid">
+                        <div>
+                            <h3 class="subsection">Create Multimedia Sources</h3>
+                        </div>
+                        <div class="video-col">
+                            <div class="video-card" onclick="openVideoWindow('videos/MultimediaSources.mp4')" role="button" tabindex="0">
+                                <video src="videos/MultimediaSources.mp4" preload="metadata"></video>
+                                <div class="video-overlay"><div class="play-btn"></div></div>
+                                <div class="video-tag">Click to expand</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== TASKS ==================== -->
+            <div class="doc-section" id="tasks">
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="title-icon bg-amber-100 text-amber-600">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M2.5 3A1.5 1.5 0 001 4.5v4A1.5 1.5 0 002.5 10h6A1.5 1.5 0 0010 8.5v-4A1.5 1.5 0 008.5 3h-6zm11 2A1.5 1.5 0 0012 6.5v7a1.5 1.5 0 001.5 1.5h4a1.5 1.5 0 001.5-1.5v-7A1.5 1.5 0 0017.5 5h-4zm-10 7A1.5 1.5 0 002 13.5v2A1.5 1.5 0 003.5 17h5A1.5 1.5 0 0010 15.5v-2A1.5 1.5 0 008.5 12h-5z" clip-rule="evenodd"/></svg>
+                        </div>
+                        Create Tasks
+                    </div>
+                    <div class="section-divider"></div>
+
+                    <p class="text-slate-600 text-[.9375rem] mb-4">Tasks are assignments that users must complete during an event. Mapli supports multiple task types for different operational needs.</p>
+
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <h4>Location Task</h4>
+                            <p>Requires users to reach a specific point on the map within a defined radius.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>Area Task</h4>
+                            <p>Requires users to monitor or secure a defined zone/sector.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>Path Task</h4>
+                            <p>Requires users to follow a route through predefined checkpoints.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>Action Task</h4>
+                            <p>Non-location-based task for general actions or duties.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>Beacon Task</h4>
+                            <p>Linked to beacon devices for indoor location tracking.</p>
+                        </div>
+                    </div>
+
+                    <hr class="section-sep">
+
+                    <!-- Location Task -->
+                    <div class="content-grid">
+                        <div>
+                            <h3 class="subsection">Create a Location Task</h3>
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text">Navigate to your Event and click <strong>Tasks</strong> on the left panel.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">Click <strong>Create New Task</strong> and select <strong>Location Task</strong>.</div></div>
+                                <div class="step-item"><div class="step-num">3</div><div class="step-text">Click on the map to place the task location marker.</div></div>
+                                <div class="step-item"><div class="step-num">4</div><div class="step-text">Fill in: Task Name, Description, Start/End Date, Location Radius (min 10m), and Assigned Users.</div></div>
+                                <div class="step-item"><div class="step-num">5</div><div class="step-text">Click <strong>Save</strong> to create the task.</div></div>
+                            </div>
+                        </div>
+                        <div class="video-col">
+                            <div class="video-card" onclick="openVideoWindow('videos/LocationTask.mp4')" role="button" tabindex="0">
+                                <video src="videos/LocationTask.mp4" preload="metadata"></video>
+                                <div class="video-overlay"><div class="play-btn"></div></div>
+                                <div class="video-tag">Click to expand</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="section-sep">
+
+                    <!-- Area Task -->
+                    <div class="content-grid">
+                        <div>
+                            <h3 class="subsection">Create an Area Task</h3>
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text">Click <strong>Create New Task</strong> and select <strong>Area Task</strong>.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">Click <strong>Draw</strong> to create a new area or <strong>Select</strong> to choose an existing area.</div></div>
+                                <div class="step-item"><div class="step-num">3</div><div class="step-text">Fill in: Task Title, Description, Start/End Date, Group of Users, and Unit count.</div></div>
+                                <div class="step-item"><div class="step-num">4</div><div class="step-text">Click <strong>Register the Task</strong> to finalize.</div></div>
+                            </div>
+                        </div>
+                        <div class="video-col">
+                            <div class="video-card" onclick="openVideoWindow('videos/AreaTask.mp4')" role="button" tabindex="0">
+                                <video src="videos/AreaTask.mp4" preload="metadata"></video>
+                                <div class="video-overlay"><div class="play-btn"></div></div>
+                                <div class="video-tag">Click to expand</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="section-sep">
+
+                    <!-- Path Task -->
+                    <div class="content-grid">
+                        <div>
+                            <h3 class="subsection">Create a Path Task</h3>
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text">Click <strong>Create New Task</strong> and select <strong>Path Task</strong>.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">Draw the path on the map — each click sets a checkpoint.</div></div>
+                                <div class="step-item"><div class="step-num">3</div><div class="step-text">Double-click or click the last checkpoint again to finish.</div></div>
+                                <div class="step-item"><div class="step-num">4</div><div class="step-text">Fill in: Task Title, Description, Checkpoint Radius (min 5m), and assign Groups/Users.</div></div>
+                                <div class="step-item"><div class="step-num">5</div><div class="step-text">Click <strong>Register the Task</strong>.</div></div>
+                            </div>
+                        </div>
+                        <div class="video-col">
+                            <div class="video-card" onclick="openVideoWindow('videos/PathTask.mp4')" role="button" tabindex="0">
+                                <video src="videos/PathTask.mp4" preload="metadata"></video>
+                                <div class="video-overlay"><div class="play-btn"></div></div>
+                                <div class="video-tag">Click to expand</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="section-sep">
+
+                    <!-- Action Task -->
+                    <div class="content-grid">
+                        <div>
+                            <h3 class="subsection">Create an Action Task</h3>
+                            <p class="text-slate-600 text-[.9375rem] mb-3">Action Tasks are not tied to any specific location on the map.</p>
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text">Click <strong>Create New Task</strong> and select <strong>Action Task</strong>.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">Fill in: Task Name, Description, Start/End Date, and assign Groups/Users.</div></div>
+                                <div class="step-item"><div class="step-num">3</div><div class="step-text">Click <strong>Register the Task</strong>.</div></div>
+                            </div>
+
+                            <div class="alert-box warning">
+                                <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>
+                                <div><strong>Note:</strong> If the task is not marked as completed by the end time, it will automatically be marked as "Failed."</div>
+                            </div>
+                        </div>
+                        <div class="video-col">
+                            <div class="video-card" onclick="openVideoWindow('videos/ActionTask.mp4')" role="button" tabindex="0">
+                                <video src="videos/ActionTask.mp4" preload="metadata"></video>
+                                <div class="video-overlay"><div class="play-btn"></div></div>
+                                <div class="video-tag">Click to expand</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="section-sep">
+
+                    <!-- Beacon Task -->
+                    <div class="content-grid">
+                        <div>
+                            <h3 class="subsection">Create a Beacon Task</h3>
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text">Click <strong>Create New Task</strong> and select <strong>Beacon Task</strong>.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">Click on an existing beacon structure on the map.</div></div>
+                                <div class="step-item"><div class="step-num">3</div><div class="step-text">Fill in: Task Name, Description, Start/End Date, and assign Groups/Users.</div></div>
+                                <div class="step-item"><div class="step-num">4</div><div class="step-text">Click <strong>Register the Task</strong>.</div></div>
+                            </div>
+                        </div>
+                        <div class="video-col">
+                            <div class="video-card" onclick="openVideoWindow('videos/BeaconTask.mp4')" role="button" tabindex="0">
+                                <video src="videos/BeaconTask.mp4" preload="metadata"></video>
+                                <div class="video-overlay"><div class="play-btn"></div></div>
+                                <div class="video-tag">Click to expand</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== EVENT PLAN ==================== -->
+            <div class="doc-section" id="event-plan">
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="title-icon bg-sky-100 text-sky-600">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.5 2A1.5 1.5 0 003 3.5v13A1.5 1.5 0 004.5 18h11a1.5 1.5 0 001.5-1.5V7.621a1.5 1.5 0 00-.44-1.06l-4.12-4.122A1.5 1.5 0 0011.378 2H4.5zm2.25 8.5a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-6.5zm0 3a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-6.5z" clip-rule="evenodd"/></svg>
+                        </div>
+                        Generate Event Plan Document
+                    </div>
+                    <div class="section-divider"></div>
+
+                    <div class="content-grid">
+                        <div>
+                            <p class="text-slate-600 text-[.9375rem] mb-3">The Event Plan Document provides a complete summary of an event, including its details, participants, and tasks.</p>
+
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text">Navigate to your Event Info page.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">Click the burger menu in the top-right corner.</div></div>
+                                <div class="step-item"><div class="step-num">3</div><div class="step-text">Select <strong>Download Word Document</strong> from the list.</div></div>
+                            </div>
+
+                            <p class="text-slate-600 text-[.9375rem] mt-4 mb-2"><strong>The generated Word document includes:</strong></p>
+                            <ul class="doc-list">
+                                <li>Event Name, Description, Start and End Dates</li>
+                                <li>List of Participants (groups, users, and devices)</li>
+                                <li>Tasks Overview with names, descriptions, timing, and assigned users</li>
+                            </ul>
+                        </div>
+                        <div class="video-col">
+                            <div class="video-card" onclick="openVideoWindow('videos/EventPlan.mp4')" role="button" tabindex="0">
+                                <video src="videos/EventPlan.mp4" preload="metadata"></video>
+                                <div class="video-overlay"><div class="play-btn"></div></div>
+                                <div class="video-tag">Click to expand</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== EVACUATION ==================== -->
+            <div class="doc-section" id="evacuation">
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="title-icon bg-red-100 text-red-600">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>
+                        </div>
+                        Evacuation Routes Planning
+                    </div>
+                    <div class="section-divider"></div>
+
+                    <div class="content-grid">
+                        <div>
+                            <p class="text-slate-600 text-[.9375rem] mb-3">The Evacuation feature allows event administrators to plan, visualize, and manage evacuation routes directly on the event map.</p>
+
+                            <h3 class="subsection">Accessing the Evacuation Panel</h3>
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text">Navigate to your Event.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">On the left side panel, click the <strong>Evacuation</strong> button.</div></div>
+                                <div class="step-item"><div class="step-num">3</div><div class="step-text">The Evacuation panel will open with options to turn mode on/off, add routes, or edit existing routes.</div></div>
+                            </div>
+
+                            <h3 class="subsection">Turning Evacuation Mode On or Off</h3>
+                            <ul class="doc-list">
+                                <li>Toggle the <strong>Evacuation Mode</strong> switch in the panel.</li>
+                                <li>When activated: notifications are sent to all mobile users, a banner appears in the web interface, and the action is logged.</li>
+                            </ul>
+
+                            <h3 class="subsection">Adding an Evacuation Route</h3>
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text">Click <strong>Add Route</strong> in the Evacuation panel.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">On the map, click to set the starting point, then click again to set the endpoint.</div></div>
+                                <div class="step-item"><div class="step-num">3</div><div class="step-text">The route will display length and estimated travel time.</div></div>
+                                <div class="step-item"><div class="step-num">4</div><div class="step-text">Repeat for additional routes, then click <strong>Save All</strong>.</div></div>
+                            </div>
+
+                            <h3 class="subsection">Editing Routes</h3>
+                            <p class="text-slate-600 text-[.9375rem]">Each route can be edited directly from the panel. Modify the path or change the mode of travel (Walking, Cycling, or Driving).</p>
+                        </div>
+                        <div class="video-col">
+                            <div class="video-card" onclick="openVideoWindow('videos/Evacuation.mp4')" role="button" tabindex="0">
+                                <video src="videos/Evacuation.mp4" preload="metadata"></video>
+                                <div class="video-overlay"><div class="play-btn"></div></div>
+                                <div class="video-tag">Click to expand</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== INCIDENTS ==================== -->
+            <div class="doc-section" id="incidents">
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="title-icon bg-orange-100 text-orange-600">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>
+                        </div>
+                        Managing Incidents
+                    </div>
+                    <div class="section-divider"></div>
+
+                    <div class="content-grid">
+                        <div>
+                            <p class="text-slate-600 text-[.9375rem] mb-3">The Incidents feature allows you to create, view, and manage incidents directly on the event map.</p>
+
+                            <h3 class="subsection">Creating a New Incident</h3>
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text">Navigate to your Event and click <strong>Incidents</strong> on the left panel.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">Click <strong>Create New Incident</strong>.</div></div>
+                                <div class="step-item"><div class="step-num">3</div><div class="step-text">Click on the map where the incident occurred.</div></div>
+                                <div class="step-item"><div class="step-num">4</div><div class="step-text">Fill in: Incident Level (Critical/Major/Minor), Description, Assigned Groups.</div></div>
+                                <div class="step-item"><div class="step-num">5</div><div class="step-text">Optionally check "Create as Task" to generate a related task.</div></div>
+                                <div class="step-item"><div class="step-num">6</div><div class="step-text">Click <strong>Register New Incident</strong>.</div></div>
+                            </div>
+
+                            <h3 class="subsection">Managing Existing Incidents</h3>
+                            <ul class="doc-list">
+                                <li>Click on any incident in the list or map to edit details.</li>
+                                <li>Statuses: <strong>Not Resolved</strong> (active) or <strong>Resolved</strong> (addressed).</li>
+                                <li>Options: Delete, Locate on Map, Mark as Resolved.</li>
+                            </ul>
+
+                            <h3 class="subsection">Incident Messaging and Media Sharing</h3>
+                            <p class="text-slate-600 text-[.9375rem] mb-2">Each incident includes a Comments section for direct communication:</p>
+                            <ul class="doc-list">
+                                <li>Send text messages</li>
+                                <li>Attach and send photos</li>
+                                <li>Attach and send video files</li>
+                            </ul>
+                        </div>
+                        <div class="video-col">
+                            <div class="video-card" onclick="openVideoWindow('videos/Incidents.mp4')" role="button" tabindex="0">
+                                <video src="videos/Incidents.mp4" preload="metadata"></video>
+                                <div class="video-overlay"><div class="play-btn"></div></div>
+                                <div class="video-tag">Click to expand</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== ACTIVITY LOG ==================== -->
+            <div class="doc-section" id="activity-log">
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="title-icon bg-yellow-100 text-yellow-600">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 2a6 6 0 00-6 6c0 1.887-.454 3.665-1.257 5.234a.75.75 0 00.515 1.076 32.91 32.91 0 003.256.508 3.5 3.5 0 006.972 0 32.903 32.903 0 003.256-.508.75.75 0 00.515-1.076A11.448 11.448 0 0116 8a6 6 0 00-6-6zm0 14.5a2 2 0 01-1.95-1.557 33.54 33.54 0 003.9 0A2 2 0 0110 16.5z" clip-rule="evenodd"/></svg>
+                        </div>
+                        Activity Log & Notifications
+                    </div>
+                    <div class="section-divider"></div>
+
+                    <p class="text-slate-600 text-[.9375rem] mb-3">The Activity Log keeps users informed about all important events. Notifications appear as a bell icon with a red counter.</p>
+
+                    <p class="text-slate-600 text-[.9375rem] mb-2"><strong>Notification Triggers:</strong></p>
+                    <ul class="doc-list">
+                        <li>New invitation code created</li>
+                        <li>User added to a chat channel</li>
+                        <li>Channel name changed</li>
+                        <li>Task reminders</li>
+                        <li>Timeline path imported</li>
+                        <li>Request to start video streaming</li>
+                        <li>Incident created</li>
+                        <li>Message sent in any channel</li>
+                        <li>Video streaming started/ended</li>
+                        <li>Task user failed</li>
+                        <li>User check-in completed</li>
+                        <li>Task started with insufficient users</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ==================== REAL-TIME LOCATIONS ==================== -->
+            <div class="doc-section" id="realtime-locations">
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="title-icon bg-teal-100 text-teal-600">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.145c.186-.1.429-.241.71-.424.56-.366 1.301-.904 2.044-1.617C14.77 15.372 16.5 13 16.5 10a6.5 6.5 0 10-13 0c0 3 1.73 5.372 3.13 6.736.744.713 1.484 1.251 2.045 1.617a13.6 13.6 0 00.99.57l.019.007.006.003zM10 11.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" clip-rule="evenodd"/></svg>
+                        </div>
+                        Monitor Real-Time Locations
+                    </div>
+                    <div class="section-divider"></div>
+
+                    <p class="text-slate-600 text-[.9375rem] mb-3">The Real-Time Location Monitoring feature allows administrators to continuously track the movement of all active mobile users.</p>
+
+                    <div class="alert-box info">
+                        <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd"/></svg>
+                        <div><strong>How it works:</strong> When a user opens the mobile app (even in background), their location is automatically updated on the web map. Location is refreshed every second (or faster) for smooth, accurate movement tracking.</div>
+                    </div>
+
+                    <p class="text-slate-600 text-[.9375rem] mt-4 mb-2">This feature helps event administrators:</p>
+                    <ul class="doc-list">
+                        <li>Maintain full situational awareness</li>
+                        <li>Monitor patrolling activities</li>
+                        <li>Respond quickly to incidents based on precise, live user locations</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ==================== TASKS REVIEW ==================== -->
+            <div class="doc-section" id="tasks-review">
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="title-icon bg-purple-100 text-purple-600">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M15.988 3.012A2.25 2.25 0 0118 5.25v6.5A2.25 2.25 0 0115.75 14H13.5V7A2.5 2.5 0 0011 4.5H8.128a2.252 2.252 0 011.884-1.488A2.25 2.25 0 0112.25 1h1.5a2.25 2.25 0 012.238 2.012zM11.5 3.25a.75.75 0 01.75-.75h1.5a.75.75 0 01.75.75v.25h-3v-.25z" clip-rule="evenodd"/><path fill-rule="evenodd" d="M2 7a1 1 0 011-1h8a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V7zm2 3.25a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5a.75.75 0 01-.75-.75zm0 3.5a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5a.75.75 0 01-.75-.75z" clip-rule="evenodd"/></svg>
+                        </div>
+                        Tasks Review
+                    </div>
+                    <div class="section-divider"></div>
+
+                    <p class="text-slate-600 text-[.9375rem] mb-3">The Tasks Review feature allows event administrators to view, filter, and analyze all tasks created for a specific event.</p>
+
+                    <h3 class="subsection">Accessing the Tasks List</h3>
+                    <div class="steps-container">
+                        <div class="step-item"><div class="step-num">1</div><div class="step-text">Navigate to your Event.</div></div>
+                        <div class="step-item"><div class="step-num">2</div><div class="step-text">On the left side panel, click <strong>Tasks</strong>.</div></div>
+                        <div class="step-item"><div class="step-num">3</div><div class="step-text">View the full list of tasks created for this event.</div></div>
+                    </div>
+
+                    <h3 class="subsection">Task Status Tabs</h3>
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <h4>Pending</h4>
+                            <p>Tasks that have not been fully completed yet.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>Completed</h4>
+                            <p>Tasks that were successfully carried out.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>Failed</h4>
+                            <p>Tasks that were not completed within their allowed conditions.</p>
+                        </div>
+                    </div>
+
+                    <h3 class="subsection">Searching for Tasks</h3>
+                    <p class="text-slate-600 text-[.9375rem]">Use the Search Bar at the top of the Tasks page to search by task title, type, ID, group, user, or any related keyword.</p>
+
+                    <h3 class="subsection">Task Report Table</h3>
+                    <p class="text-slate-600 text-[.9375rem] mb-3">Click the <strong>Task Report</strong> button to open a detailed, export-ready table displaying:</p>
+                    <table class="doc-table">
+                        <tbody>
+                            <tr><td><strong>ID</strong></td><td>Unique task identifier</td></tr>
+                            <tr><td><strong>Type</strong></td><td>Location, Area, Path, Action, Beacon, etc.</td></tr>
+                            <tr><td><strong>Title</strong></td><td>Name of the task</td></tr>
+                            <tr><td><strong>Description</strong></td><td>Task details or purpose</td></tr>
+                            <tr><td><strong>Status</strong></td><td>Pending / Completed / Failed</td></tr>
+                            <tr><td><strong>Starts / Ends</strong></td><td>Task start and end times</td></tr>
+                            <tr><td><strong>Group</strong></td><td>Group assigned to the task</td></tr>
+                            <tr><td><strong>Users</strong></td><td>All participating users</td></tr>
+                            <tr><td><strong>Registered By</strong></td><td>Administrator who created the task</td></tr>
+                            <tr><td><strong>Comments</strong></td><td>Number of comments or media added</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ==================== MESSAGING ==================== -->
+            <div class="doc-section" id="messaging">
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="title-icon bg-blue-100 text-blue-600">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.43 2.524A41.29 41.29 0 0110 2c2.236 0 4.43.18 6.57.524 1.437.231 2.43 1.49 2.43 2.902v5.148c0 1.413-.993 2.67-2.43 2.902a41.102 41.102 0 01-3.55.414c-.28.02-.521.18-.643.413l-1.712 3.293a.75.75 0 01-1.33 0l-1.713-3.293a.783.783 0 00-.642-.413 41.108 41.108 0 01-3.55-.414C1.993 13.245 1 11.986 1 10.574V5.426c0-1.413.993-2.67 2.43-2.902z" clip-rule="evenodd"/></svg>
+                        </div>
+                        Messaging
+                    </div>
+                    <div class="section-divider"></div>
+
+                    <div class="content-grid">
+                        <div>
+                            <p class="text-slate-600 text-[.9375rem] mb-3">The Messaging feature allows event participants to communicate in real time through text, voice, photo, and video messages.</p>
+
+                            <h3 class="subsection">Accessing the Messaging Panel</h3>
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text">Navigate to your Event.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">On the left side panel, click the <strong>Messaging</strong> button.</div></div>
+                                <div class="step-item"><div class="step-num">3</div><div class="step-text">View existing chats and channels in the Messaging panel.</div></div>
+                            </div>
+
+                            <h3 class="subsection">Types of Channels</h3>
+                            <ul class="doc-list">
+                                <li><strong>General Channel</strong> &ndash; A shared channel including all members of the event.</li>
+                                <li><strong>Group Channels</strong> &ndash; Automatically created for each group added to the event.</li>
+                                <li><strong>Custom Channels</strong> &ndash; Create your own for private or small-group communication.</li>
+                            </ul>
+
+                            <h3 class="subsection">Creating a New Channel</h3>
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text">Click the <strong>Create Channel</strong> button.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">Select participants (individuals or groups).</div></div>
+                                <div class="step-item"><div class="step-num">3</div><div class="step-text">Enter a Channel Name (optional for private chats).</div></div>
+                                <div class="step-item"><div class="step-num">4</div><div class="step-text">Click <strong>Create</strong> to start the conversation.</div></div>
+                            </div>
+
+                            <h3 class="subsection">Sending Messages and Media</h3>
+                            <ul class="doc-list">
+                                <li>Send text messages</li>
+                                <li>Record and send voice messages</li>
+                                <li>Attach and send photos</li>
+                                <li>Attach and send videos</li>
+                            </ul>
+                        </div>
+                        <div class="video-col">
+                            <div class="video-card" onclick="openVideoWindow('videos/Messaging.mp4')" role="button" tabindex="0">
+                                <video src="videos/Messaging.mp4" preload="metadata"></video>
+                                <div class="video-overlay"><div class="play-btn"></div></div>
+                                <div class="video-tag">Click to expand</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== TIMELINE ==================== -->
+            <div class="doc-section" id="timeline">
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="title-icon bg-indigo-100 text-indigo-600">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd"/></svg>
+                        </div>
+                        Timeline
+                    </div>
+                    <div class="section-divider"></div>
+
+                    <div class="content-grid">
+                        <div>
+                            <p class="text-slate-600 text-[.9375rem] mb-3">The Timeline feature allows event administrators to review user movement history on the map, visualizing tracked paths over a selected time period.</p>
+
+                            <h3 class="subsection">Accessing the Timeline</h3>
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text">Navigate to your Event.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">At the bottom center of the screen, click <strong>Show Timeline</strong>.</div></div>
+                                <div class="step-item"><div class="step-num">3</div><div class="step-text">The Timeline panel will appear with time range and filtering options.</div></div>
+                            </div>
+
+                            <h3 class="subsection">Using the Timeline</h3>
+                            <ul class="doc-list">
+                                <li>The system tracks users' locations through the mobile app, drawing paths on the map.</li>
+                                <li>Filter by date and time to focus on specific activity periods.</li>
+                                <li>The corresponding movement path will appear as a drawn route.</li>
+                            </ul>
+
+                            <h3 class="subsection">Adjusting the Time Range</h3>
+                            <p class="text-slate-600 text-[.9375rem] mb-2">Use the orange time bar at the bottom of the panel:</p>
+                            <ul class="doc-list">
+                                <li><strong>Drag edges</strong> &ndash; Shrink or expand the time frame.</li>
+                                <li><strong>Move the bar</strong> &ndash; Shift the visible time range left or right.</li>
+                                <li>The map updates automatically to show movements within the selected window.</li>
+                            </ul>
+                        </div>
+                        <div class="video-col">
+                            <div class="video-card" onclick="openVideoWindow('videos/Timeline.mp4')" role="button" tabindex="0">
+                                <video src="videos/Timeline.mp4" preload="metadata"></video>
+                                <div class="video-overlay"><div class="play-btn"></div></div>
+                                <div class="video-tag">Click to expand</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== MOBILE APP ==================== -->
+            <div class="doc-section" id="mobile">
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="title-icon bg-green-100 text-green-600">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M8 16.25a.75.75 0 01.75-.75h2.5a.75.75 0 010 1.5h-2.5a.75.75 0 01-.75-.75z"/><path fill-rule="evenodd" d="M4 4a3 3 0 013-3h6a3 3 0 013 3v12a3 3 0 01-3 3H7a3 3 0 01-3-3V4zm3-1.5A1.5 1.5 0 005.5 4v12A1.5 1.5 0 007 17.5h6a1.5 1.5 0 001.5-1.5V4A1.5 1.5 0 0013 2.5H7z" clip-rule="evenodd"/></svg>
+                        </div>
+                        Mobile App - Execute Event (Field Personnel)
+                    </div>
+                    <div class="section-divider"></div>
+
+                    <p class="text-slate-600 text-[.9375rem] mb-4">Field personnel use the mobile app to execute tasks, report incidents, and communicate with administrators in real-time.</p>
+
+                    <!-- Location Change Task -->
+                    <div class="content-grid">
+                        <div>
+                            <h3 class="subsection">Location Change Task</h3>
+                            <p class="text-slate-600 text-[.9375rem] mb-3">Requires the user to reach a specific point on the map within the defined radius.</p>
+
+                            <h4 class="sub-subsection">Accessing the Task</h4>
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text">Open the Mobile App.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">Tap <strong>Tasks</strong> in the bottom navigation bar.</div></div>
+                                <div class="step-item"><div class="step-num">3</div><div class="step-text">Find and tap your Location Change Task in "My Tasks".</div></div>
+                            </div>
+
+                            <h4 class="sub-subsection">Task Details Screen</h4>
+                            <ul class="doc-list">
+                                <li><strong>Navigation Button</strong> &ndash; Returns to the main map screen.</li>
+                                <li><strong>Map Preview</strong> &ndash; Shows the exact task location.</li>
+                                <li><strong>Task Overview</strong> &ndash; ID, type, and participant info.</li>
+                                <li><strong>Task Timing</strong> &ndash; Start and end times.</li>
+                                <li><strong>User Status</strong> &ndash; Pending, Completed, or Failed lists.</li>
+                                <li><strong>Comments Button</strong> &ndash; Add text, photos, or videos.</li>
+                            </ul>
+
+                            <h4 class="sub-subsection">Completing the Task</h4>
+                            <p class="text-slate-600 text-[.9375rem]">Move physically to the pinned location. Once you enter the defined radius, the system automatically marks the task as Completed.</p>
+                        </div>
+                        <div class="video-col">
+                            <div class="video-card" onclick="openVideoWindow('videos/MobileLocationTask.mp4')" role="button" tabindex="0">
+                                <video src="videos/MobileLocationTask.mp4" preload="metadata"></video>
+                                <div class="video-overlay"><div class="play-btn"></div></div>
+                                <div class="video-tag">Click to expand</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="section-sep">
+
+                    <!-- Area Task -->
+                    <div class="content-grid">
+                        <div>
+                            <h3 class="subsection">Area (Sector Monitoring) Task</h3>
+                            <p class="text-slate-600 text-[.9375rem] mb-3">Requires users to enter and remain within a defined area for the specified duration.</p>
+
+                            <h4 class="sub-subsection">Key Actions</h4>
+                            <ul class="doc-list">
+                                <li><strong>Check In</strong> &ndash; Tap when entering the area to start patrolling.</li>
+                                <li><strong>Check Out</strong> &ndash; Tap when finished.</li>
+                            </ul>
+
+                            <div class="alert-box warning">
+                                <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>
+                                <div><strong>Important:</strong> After checking out, you cannot check in again for the same task. Checking out early marks the task as Failed for your user.</div>
+                            </div>
+                        </div>
+                        <div class="video-col">
+                            <div class="video-card" onclick="openVideoWindow('videos/AreaTaskMobile.mp4')" role="button" tabindex="0">
+                                <video src="videos/AreaTaskMobile.mp4" preload="metadata"></video>
+                                <div class="video-overlay"><div class="play-btn"></div></div>
+                                <div class="video-tag">Click to expand</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="section-sep">
+
+                    <!-- Path Task -->
+                    <div class="content-grid">
+                        <div>
+                            <h3 class="subsection">Path Task</h3>
+                            <p class="text-slate-600 text-[.9375rem] mb-3">Requires users to move through predefined checkpoints on the map.</p>
+
+                            <h4 class="sub-subsection">Completing the Task</h4>
+                            <ul class="doc-list">
+                                <li>Locate checkpoints on the map.</li>
+                                <li>Move physically toward each checkpoint.</li>
+                                <li>When your position enters the checkpoint's radius, it's marked as passed.</li>
+                                <li>You can visit checkpoints in any order.</li>
+                                <li>Once all checkpoints are passed, the task is Completed.</li>
+                            </ul>
+                        </div>
+                        <div class="video-col">
+                            <div class="video-card" onclick="openVideoWindow('videos/PathMobile.mp4')" role="button" tabindex="0">
+                                <video src="videos/PathMobile.mp4" preload="metadata"></video>
+                                <div class="video-overlay"><div class="play-btn"></div></div>
+                                <div class="video-tag">Click to expand</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="section-sep">
+
+                    <!-- Action Task -->
+                    <div class="content-grid">
+                        <div>
+                            <h3 class="subsection">Action Task</h3>
+                            <p class="text-slate-600 text-[.9375rem] mb-3">Non-location-based task that can be completed manually.</p>
+
+                            <h4 class="sub-subsection">Completing the Task</h4>
+                            <p class="text-slate-600 text-[.9375rem]">Simply tap the <strong>Complete Task</strong> button to mark it as done.</p>
+
+                            <div class="alert-box info">
+                                <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd"/></svg>
+                                <div><strong>Note:</strong> If an end time is set and the task isn't completed before that time, it automatically fails. Once failed, users cannot manually complete it.</div>
+                            </div>
+                        </div>
+                        <div class="video-col">
+                            <div class="video-card" onclick="openVideoWindow('videos/ActionTaskMobile.mp4')" role="button" tabindex="0">
+                                <video src="videos/ActionTaskMobile.mp4" preload="metadata"></video>
+                                <div class="video-overlay"><div class="play-btn"></div></div>
+                                <div class="video-tag">Click to expand</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="section-sep">
+
+                    <!-- Beacon Task -->
+                    <h3 class="subsection">Beacon Task</h3>
+                    <p class="text-slate-600 text-[.9375rem] mb-3">Requires the user to reach a specific indoor location with a beacon device.</p>
+
+                    <h4 class="sub-subsection">Completing the Task</h4>
+                    <div class="steps-container">
+                        <div class="step-item"><div class="step-num">1</div><div class="step-text">Go to the task location shown on the map.</div></div>
+                        <div class="step-item"><div class="step-num">2</div><div class="step-text">Tap <strong>Start Scanning</strong> when near the beacon.</div></div>
+                        <div class="step-item"><div class="step-num">3</div><div class="step-text">The system detects your proximity and marks the task as Completed.</div></div>
+                    </div>
+
+                    <div class="alert-box info">
+                        <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd"/></svg>
+                        <div><strong>Tip:</strong> Ensure Bluetooth is enabled on your mobile device to detect beacons.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== MOBILE INCIDENTS ==================== -->
+            <div class="doc-section" id="mobile-incidents">
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="title-icon bg-red-100 text-red-600">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>
+                        </div>
+                        Mobile App - Creating Incidents
+                    </div>
+                    <div class="section-divider"></div>
+
+                    <div class="content-grid">
+                        <div>
+                            <p class="text-slate-600 text-[.9375rem] mb-3">The mobile app allows users to quickly report emergencies using the SOS button.</p>
+
+                            <h3 class="subsection">Accessing the SOS Button</h3>
+                            <p class="text-slate-600 text-[.9375rem] mb-3">On the main map screen, look for the <strong>SOS button</strong> in the bottom-left corner.</p>
+
+                            <h3 class="subsection">Creating an Incident via SOS</h3>
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text"><strong>Press and hold</strong> the SOS button for 2 seconds.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">The system automatically creates a <strong>Critical</strong> incident at your current GPS position.</div></div>
+                            </div>
+
+                            <div class="alert-box success">
+                                <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/></svg>
+                                <div><strong>Result:</strong> A Critical incident with status "Not Resolved" is created immediately at your location — no additional input required.</div>
+                            </div>
+
+                            <h3 class="subsection">Viewing and Managing Incidents</h3>
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text">Tap <strong>Incidents</strong> in the bottom navigation bar.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">View the list of all incidents related to the event.</div></div>
+                                <div class="step-item"><div class="step-num">3</div><div class="step-text">Tap any incident to view details and add comments.</div></div>
+                            </div>
+
+                            <h3 class="subsection">Commenting & Attachments</h3>
+                            <p class="text-slate-600 text-[.9375rem] mb-2">Inside any incident, you can:</p>
+                            <ul class="doc-list">
+                                <li>Send text messages</li>
+                                <li>Attach photos and videos</li>
+                                <li>Record and send voice messages</li>
+                            </ul>
+                        </div>
+                        <div class="video-col">
+                            <div class="video-card" onclick="openVideoWindow('videos/IncidentMobile.mp4')" role="button" tabindex="0">
+                                <video src="videos/IncidentMobile.mp4" preload="metadata"></video>
+                                <div class="video-overlay"><div class="play-btn"></div></div>
+                                <div class="video-tag">Click to expand</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== MOBILE MESSAGING ==================== -->
+            <div class="doc-section" id="mobile-messaging">
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="title-icon bg-blue-100 text-blue-600">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.43 2.524A41.29 41.29 0 0110 2c2.236 0 4.43.18 6.57.524 1.437.231 2.43 1.49 2.43 2.902v5.148c0 1.413-.993 2.67-2.43 2.902a41.102 41.102 0 01-3.55.414c-.28.02-.521.18-.643.413l-1.712 3.293a.75.75 0 01-1.33 0l-1.713-3.293a.783.783 0 00-.642-.413 41.108 41.108 0 01-3.55-.414C1.993 13.245 1 11.986 1 10.574V5.426c0-1.413.993-2.67 2.43-2.902z" clip-rule="evenodd"/></svg>
+                        </div>
+                        Mobile App - Messaging
+                    </div>
+                    <div class="section-divider"></div>
+
+                    <div class="content-grid">
+                        <div>
+                            <p class="text-slate-600 text-[.9375rem] mb-3">Communicate in real-time with event participants through text, media, and voice messages.</p>
+
+                            <h3 class="subsection">Accessing Messaging</h3>
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text">Open the Mobile App.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">Tap <strong>Messages</strong> in the bottom navigation panel.</div></div>
+                                <div class="step-item"><div class="step-num">3</div><div class="step-text">View existing channels and conversations.</div></div>
+                            </div>
+
+                            <h3 class="subsection">Types of Channels</h3>
+                            <ul class="doc-list">
+                                <li><strong>General Channel</strong> &ndash; All event users.</li>
+                                <li><strong>Group Channel</strong> &ndash; Automatically created for each group.</li>
+                                <li><strong>Custom Channels / DMs</strong> &ndash; Create your own or message group members directly.</li>
+                            </ul>
+
+                            <h3 class="subsection">Sending Messages and Media</h3>
+                            <ul class="doc-list">
+                                <li>Send text messages</li>
+                                <li>Attach and send photos</li>
+                                <li>Attach and send videos</li>
+                                <li>Record and send voice messages</li>
+                            </ul>
+                        </div>
+                        <div class="video-col">
+                            <div class="video-card" onclick="openVideoWindow('videos/MessagingMobile.mp4')" role="button" tabindex="0">
+                                <video src="videos/MessagingMobile.mp4" preload="metadata"></video>
+                                <div class="video-overlay"><div class="play-btn"></div></div>
+                                <div class="video-tag">Click to expand</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== MOBILE EVACUATION ==================== -->
+            <div class="doc-section" id="mobile-evacuation">
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="title-icon bg-rose-100 text-rose-600">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M10 3.75a2 2 0 10-4 0 2 2 0 004 0zM17.25 11.5a.75.75 0 000-1.5h-4l-1.553-2.486A2.25 2.25 0 009.788 6.5H8.052a2.25 2.25 0 00-1.905 1.053L3.56 12.197a.75.75 0 001.267.806L6.782 9.8l1.693 4.233-2.647 4.94a.75.75 0 001.325.71L10 14.618l2.848 5.065a.75.75 0 001.324-.71l-2.647-4.94 1.218-3.044L14.25 11.5h3z"/></svg>
+                        </div>
+                        Mobile App - Evacuation Mode
+                    </div>
+                    <div class="section-divider"></div>
+
+                    <div class="content-grid">
+                        <div>
+                            <p class="text-slate-600 text-[.9375rem] mb-3">Evacuation Mode guides mobile users safely to exit points during emergencies.</p>
+
+                            <h3 class="subsection">Receiving Evacuation Alerts</h3>
+                            <ul class="doc-list">
+                                <li>When Evacuation Mode is activated in the Web App, all mobile users receive a real-time notification.</li>
+                                <li>A red evacuation button with a running person icon appears on screen.</li>
+                            </ul>
+
+                            <h3 class="subsection">Selecting Evacuation Route</h3>
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text">Tap the <strong>Evacuation Button</strong>.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">Choose your mode: <strong>Walking</strong>, <strong>Cycling</strong>, or <strong>Driving</strong>.</div></div>
+                                <div class="step-item"><div class="step-num">3</div><div class="step-text">Tap <strong>Generate</strong> to calculate your route.</div></div>
+                            </div>
+
+                            <h3 class="subsection">Route Guidance</h3>
+                            <ul class="doc-list">
+                                <li>The system generates a path to the closest evacuation endpoint.</li>
+                                <li>Users are always routed to the nearest safe exit based on current location.</li>
+                                <li>The path is displayed on the map for users to follow safely.</li>
+                            </ul>
+                        </div>
+                        <div class="video-col">
+                            <div class="video-card" onclick="openVideoWindow('videos/EvacuationMobile.mp4')" role="button" tabindex="0">
+                                <video src="videos/EvacuationMobile.mp4" preload="metadata"></video>
+                                <div class="video-overlay"><div class="play-btn"></div></div>
+                                <div class="video-tag">Click to expand</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== ADDITIONAL MODULES ==================== -->
+            <div class="doc-section" id="additional-modules">
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="title-icon bg-slate-100 text-slate-600">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 16.82A7.462 7.462 0 0115 15.5c.71 0 1.396.098 2.046.282A.75.75 0 0018 15.06V3.94a.75.75 0 00-.546-.722A9.006 9.006 0 0015 2.8a8.96 8.96 0 00-4.25 1.063v12.958zM9.25 4.863A8.96 8.96 0 005 3.8a9.006 9.006 0 00-2.454.418A.75.75 0 002 4.94v11.12a.75.75 0 00.954.722A7.462 7.462 0 015 16.5a7.46 7.46 0 014.25 1.32V4.863z"/></svg>
+                        </div>
+                        Additional Modules
+                    </div>
+                    <div class="section-divider"></div>
+
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <h4>Module 3: Respond To Unplanned Man-Made Disaster</h4>
+                            <p>Documentation coming soon for responding to unexpected man-made emergencies.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>Module 4: Manage A Natural Disaster Incident</h4>
+                            <p>Documentation coming soon for natural disaster management operations.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /content-body -->
+    </div><!-- /main-content -->
+
+    <!-- Back to top -->
+    <button id="back-to-top" aria-label="Back to top">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 17a.75.75 0 01-.75-.75V5.612L5.29 9.77a.75.75 0 01-1.08-1.04l5.25-5.5a.75.75 0 011.08 0l5.25 5.5a.75.75 0 11-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0110 17z" clip-rule="evenodd"/></svg>
+    </button>
+
+    <!-- Modal for expanded video -->
+    <div class="modal" id="videoModal">
+        <div class="modal-inner">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <video id="modalVideo" controls autoplay></video>
+        </div>
+    </div>
+
+    <script>
+    // ---- Video popup window ----
+    function openVideoWindow(videoSrc) {
+        const url = 'video-player.html?src=' + encodeURIComponent(videoSrc);
+        const w = 720, h = 405;
+        const left = Math.max(0, Math.round((screen.width - w) / 2));
+        const top  = Math.max(0, Math.round((screen.height - h) / 2));
+        const features = `popup=yes,width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=no,noopener=yes,noreferrer=yes`;
+        const win = window.open(url, 'videoWindow', features);
+        if (win) win.focus();
+    }
+
+    // ---- Modal ----
+    function openModal(videoUrl) {
+        const modal = document.getElementById('videoModal');
+        const video = document.getElementById('modalVideo');
+        video.src = videoUrl;
+        video.play();
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+        const modal = document.getElementById('videoModal');
+        const video = document.getElementById('modalVideo');
+        video.pause();
+        video.src = '';
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    document.getElementById('videoModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+
+    // ---- Sidebar toggle (mobile) ----
+    const hamburger = document.getElementById('hamburger');
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('open');
+        sidebar.classList.toggle('open');
+        backdrop.classList.toggle('open');
+    });
+    backdrop.addEventListener('click', () => {
+        hamburger.classList.remove('open');
+        sidebar.classList.remove('open');
+        backdrop.classList.remove('open');
+    });
+
+    // ---- Nav group collapse ----
+    function toggleGroup(el) {
+        const items = el.nextElementSibling;
+        el.classList.toggle('collapsed');
+        items.classList.toggle('collapsed');
+    }
+
+    // ---- Scroll spy ----
+    const sections = document.querySelectorAll('.doc-section[id]');
+    const navItems = document.querySelectorAll('.nav-item[data-section]');
+    const breadcrumbEl = document.getElementById('breadcrumb-section');
+
+    const sectionNames = {
+        'module1':'Platform Overview','module2':'Plan Event','groups-users':'Groups & Users',
+        'devices':'Devices','media-sources':'Media Sources','zones-sectors':'Zones & Sectors',
+        'tasks':'Tasks','event-plan':'Event Plan','evacuation':'Evacuation','incidents':'Incidents',
+        'activity-log':'Activity Log','realtime-locations':'Real-Time Locations','tasks-review':'Tasks Review',
+        'messaging':'Messaging','timeline':'Timeline','mobile':'Mobile App','mobile-incidents':'Mobile Incidents',
+        'mobile-messaging':'Mobile Messaging','mobile-evacuation':'Mobile Evacuation','additional-modules':'Additional Modules'
+    };
+
+    function updateScrollSpy() {
+        const scrollPos = window.scrollY + 120;
+        let current = null;
+        sections.forEach(s => { if (s.offsetTop <= scrollPos) current = s; });
+        if (current) {
+            navItems.forEach(n => {
+                n.classList.toggle('active', n.dataset.section === current.id);
+            });
+            breadcrumbEl.textContent = sectionNames[current.id] || current.id;
+        }
+    }
+
+    // ---- Reading progress ----
+    const progressBar = document.getElementById('reading-progress');
+    const progressBarMini = document.getElementById('progress-bar-mini');
+    const progressText = document.getElementById('progress-text');
+
+    function updateProgress() {
+        const winH = window.innerHeight;
+        const docH = document.documentElement.scrollHeight - winH;
+        const pct = docH > 0 ? Math.min(100, Math.round((window.scrollY / docH) * 100)) : 0;
+        progressBar.style.width = pct + '%';
+        progressBarMini.style.width = pct + '%';
+        progressText.textContent = pct + '%';
+    }
+
+    // ---- Back to top ----
+    const backToTop = document.getElementById('back-to-top');
+    function updateBackToTop() {
+        backToTop.classList.toggle('visible', window.scrollY > 400);
+    }
+    backToTop.addEventListener('click', () => window.scrollTo({ top:0, behavior:'smooth' }));
+
+    // ---- Scroll handler ----
+    window.addEventListener('scroll', () => { updateScrollSpy(); updateProgress(); updateBackToTop(); }, { passive:true });
+    window.addEventListener('load', () => { updateScrollSpy(); updateProgress(); });
+
+    // ---- Intersection observer for fade-in ----
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+    }, { threshold:0.08 });
+    sections.forEach(s => observer.observe(s));
+
+    // ---- Smooth scroll nav clicks ----
+    navItems.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const id = this.getAttribute('href').substring(1);
+            const el = document.getElementById(id);
+            if (el) {
+                window.scrollTo({ top: el.offsetTop - 60, behavior:'smooth' });
+                // Close mobile sidebar
+                hamburger.classList.remove('open');
+                sidebar.classList.remove('open');
+                backdrop.classList.remove('open');
+            }
+        });
+    });
+
+    // ---- Sidebar search ----
+    document.getElementById('sidebar-search').addEventListener('input', function() {
+        const q = this.value.toLowerCase().trim();
+        navItems.forEach(item => {
+            const text = item.textContent.toLowerCase();
+            item.style.display = (!q || text.includes(q)) ? '' : 'none';
+        });
+    });
+    </script>
+</body>
+</html>
