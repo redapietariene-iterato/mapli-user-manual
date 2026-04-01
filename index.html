@@ -267,7 +267,7 @@
                     </a>
                     <a href="#video-streams" class="nav-item" data-section="video-streams">
                         <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M3.25 4A2.25 2.25 0 001 6.25v7.5A2.25 2.25 0 003.25 16h7.5A2.25 2.25 0 0013 13.75v-7.5A2.25 2.25 0 0010.75 4h-7.5zM19 4.75a.75.75 0 00-1.28-.53l-3 3a.75.75 0 00-.22.53v4.5c0 .199.079.39.22.53l3 3a.75.75 0 001.28-.53V4.75z"/></svg>
-                        Video Streams
+                        Streaming
                     </a>
                     <a href="#messaging" class="nav-item" data-section="messaging">
                         <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.43 2.524A41.29 41.29 0 0110 2c2.236 0 4.43.18 6.57.524 1.437.231 2.43 1.49 2.43 2.902v5.148c0 1.413-.993 2.67-2.43 2.902a41.102 41.102 0 01-3.55.414c-.28.02-.521.18-.643.413l-1.712 3.293a.75.75 0 01-1.33 0l-1.713-3.293a.783.783 0 00-.642-.413 41.108 41.108 0 01-3.55-.414C1.993 13.245 1 11.986 1 10.574V5.426c0-1.413.993-2.67 2.43-2.902z" clip-rule="evenodd"/></svg>
@@ -297,7 +297,7 @@
                     </a>
                       <a href="#mobile-streaming" class="nav-item" data-section="mobile-streaming">
                         <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.25 4A2.25 2.25 0 001 6.25v7.5A2.25 2.25 0 003.25 16h7.5A2.25 2.25 0 0013 13.75v-7.5A2.25 2.25 0 0010.75 4h-7.5zM19 4.75a.75.75 0 00-1.28-.53l-3 3a.75.75 0 00-.22.53v4.5c0 .199.079.39.22.53l3 3a.75.75 0 001.28-.53V4.75z" clip-rule="evenodd"/></svg>
-                        Streaming Video
+                        Streaming
                     </a>
                     <a href="#mobile-messaging" class="nav-item" data-section="mobile-messaging">
                         <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.43 2.524A41.29 41.29 0 0110 2c2.236 0 4.43.18 6.57.524 1.437.231 2.43 1.49 2.43 2.902v5.148c0 1.413-.993 2.67-2.43 2.902a41.102 41.102 0 01-3.55.414c-.28.02-.521.18-.643.413l-1.712 3.293a.75.75 0 01-1.33 0l-1.713-3.293a.783.783 0 00-.642-.413 41.108 41.108 0 01-3.55-.414C1.993 13.245 1 11.986 1 10.574V5.426c0-1.413.993-2.67 2.43-2.902z" clip-rule="evenodd"/></svg>
@@ -1327,6 +1327,83 @@
                 </div>
             </div>
 
+<!-- ==================== ORTHOPHOTOS ==================== -->
+<div class="doc-section" id="orthophotos">
+    <div class="section-card">
+        <div class="section-title">
+            <div class="title-icon bg-indigo-100 text-indigo-600">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M2 5a2 2 0 012-2h3l1-1h4l1 1h3a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5z"/>
+                </svg>
+            </div>
+            Orthophotos
+        </div>
+        <div class="section-divider"></div>
+
+        <div class="content-grid">
+            <div>
+                <p class="text-slate-600 text-[.9375rem] mb-3">
+                    The Orthophotos feature allows operators to request aerial imagery from drones or view satellite-based orthophotos. This enables monitoring of real-time events such as floods, accidents, crowd gatherings, and other situations.
+                </p>
+
+                <h3 class="subsection">Requesting an Orthophoto from a Drone</h3>
+                <div class="steps-container">
+                    <div class="step-item"><div class="step-num">1</div><div class="step-text">Open <strong>Timeline mode</strong> in the web application.</div></div>
+                    <div class="step-item"><div class="step-num">2</div><div class="step-text">Locate the area on the map where you want to capture an orthophoto.</div></div>
+                    <div class="step-item"><div class="step-num">3</div><div class="step-text">Open the <strong>Layers menu</strong> and click <strong>Orthophoto</strong> in the <strong>+Import</strong> section.</div></div>
+                    <div class="step-item"><div class="step-num">4</div><div class="step-text">Draw a rectangular (4-point) area and press <strong>Enter</strong>.</div></div>
+                    <div class="step-item"><div class="step-num">5</div><div class="step-text">If a drone operator is available, configure mission parameters such as altitude and overlap.</div></div>
+                    <div class="step-item"><div class="step-num">6</div><div class="step-text">Submit valid parameters to start the mission. The orthophoto will be available after capture and processing.</div></div>
+                </div>
+
+                <h3 class="subsection">Drone Mission Parameters</h3>
+                <ul class="doc-list">
+                    <li><strong>Altitude (default: 30 m)</strong> – Higher altitude is recommended for larger areas.</li>
+                    <li><strong>Overlap (default: 70%)</strong> – Higher overlap ensures more accurate and undistorted images.</li>
+                    <li>If parameters are invalid, the system will prompt you to correct them.</li>
+                </ul>
+
+                <h3 class="subsection">Viewing Satellite Orthophotos</h3>
+                <div class="steps-container">
+                    <div class="step-item"><div class="step-num">1</div><div class="step-text">Open <strong>Timeline mode</strong>.</div></div>
+                    <div class="step-item"><div class="step-num">2</div><div class="step-text">Open the <strong>Layers menu</strong>.</div></div>
+                    <div class="step-item"><div class="step-num">3</div><div class="step-text">Find <strong>Orthophotos from satellite</strong> and toggle the desired layer.</div></div>
+                    <div class="step-item"><div class="step-num">4</div><div class="step-text">Use the location icon to navigate to detected objects on the map.</div></div>
+                </div>
+
+                <h3 class="subsection">Reviewing Orthophotos and Detections</h3>
+                <div class="steps-container">
+                    <div class="step-item"><div class="step-num">1</div><div class="step-text">Open the <strong>Layers menu</strong>.</div></div>
+                    <div class="step-item"><div class="step-num">2</div><div class="step-text">Expand <strong>Orthophotos from drones</strong> or <strong>Orthophotos from satellite</strong>.</div></div>
+                    <div class="step-item"><div class="step-num">3</div><div class="step-text">Enable an orthophoto using the checkbox.</div></div>
+                    <div class="step-item"><div class="step-num">4</div><div class="step-text">Click the location icon to jump to the orthophoto on the map.</div></div>
+                </div>
+
+                <ul class="doc-list">
+                    <li>Orthophotos being processed appear as disabled entries.</li>
+                    <li>Detected objects (e.g., houses, cars, floods, fires) may appear as separate layers.</li>
+                    <li>Detection layers can be toggled on or off independently.</li>
+                </ul>
+
+                <div class="alert-box success">
+                    <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/>
+                    </svg>
+                    <div><strong>Result:</strong> Orthophotos and detected objects are displayed on the map, enabling detailed situational awareness and analysis.</div>
+                </div>
+            </div>
+
+            <div class="video-col">
+                <div class="video-card" onclick="openVideoWindow('videos/DroneOrthophoto.mp4')" role="button" tabindex="0">
+                    <video src="videos/DroneOrthophoto.mp4" preload="metadata"></video>
+                    <div class="video-overlay"><div class="play-btn"></div></div>
+                    <div class="video-tag">Click to expand</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+            
             <!-- ==================== MOBILE APP ==================== -->
             <div class="doc-section" id="mobile">
                 <div class="section-card">
