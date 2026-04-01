@@ -265,6 +265,10 @@
                         <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M15.988 3.012A2.25 2.25 0 0118 5.25v6.5A2.25 2.25 0 0115.75 14H13.5V7A2.5 2.5 0 0011 4.5H8.128a2.252 2.252 0 011.884-1.488A2.25 2.25 0 0112.25 1h1.5a2.25 2.25 0 012.238 2.012zM11.5 3.25a.75.75 0 01.75-.75h1.5a.75.75 0 01.75.75v.25h-3v-.25z" clip-rule="evenodd"/><path fill-rule="evenodd" d="M2 7a1 1 0 011-1h8a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V7zm2 3.25a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5a.75.75 0 01-.75-.75zm0 3.5a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5a.75.75 0 01-.75-.75z" clip-rule="evenodd"/></svg>
                         Tasks Review
                     </a>
+                    <a href="#video-stream" class="nav-item" data-section="video-stream">
+                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M3.25 4A2.25 2.25 0 001 6.25v7.5A2.25 2.25 0 003.25 16h7.5A2.25 2.25 0 0013 13.75v-7.5A2.25 2.25 0 0010.75 4h-7.5zM19 4.75a.75.75 0 00-1.28-.53l-3 3a.75.75 0 00-.22.53v4.5c0 .199.079.39.22.53l3 3a.75.75 0 001.28-.53V4.75z"/></svg>
+                        Video Streams
+                    </a>
                     <a href="#messaging" class="nav-item" data-section="messaging">
                         <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.43 2.524A41.29 41.29 0 0110 2c2.236 0 4.43.18 6.57.524 1.437.231 2.43 1.49 2.43 2.902v5.148c0 1.413-.993 2.67-2.43 2.902a41.102 41.102 0 01-3.55.414c-.28.02-.521.18-.643.413l-1.712 3.293a.75.75 0 01-1.33 0l-1.713-3.293a.783.783 0 00-.642-.413 41.108 41.108 0 01-3.55-.414C1.993 13.245 1 11.986 1 10.574V5.426c0-1.413.993-2.67 2.43-2.902z" clip-rule="evenodd"/></svg>
                         Messaging
@@ -1133,6 +1137,43 @@
                 </div>
             </div>
 
+ <!-- ==================== VIDEO STREAMS ==================== -->
+            <div class="doc-section" id="video-streams">
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="title-icon bg-pink-100 text-pink-600">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M3.25 4A2.25 2.25 0 001 6.25v7.5A2.25 2.25 0 003.25 16h7.5A2.25 2.25 0 0013 13.75v-7.5A2.25 2.25 0 0010.75 4h-7.5zM19 4.75a.75.75 0 00-1.28-.53l-3 3a.75.75 0 00-.22.53v4.5c0 .199.079.39.22.53l3 3a.75.75 0 001.28-.53V4.75z"/></svg>
+                        </div>
+                        Video Streams
+                    </div>
+                    <div class="section-divider"></div>
+
+                    <div class="content-grid">
+                        <div>
+                            <p class="text-slate-600 text-[.9375rem] mb-3">Streaming is available for mobile device users as a way of communicating with web app operators - a live transmission of footage from the users’ camera to the computer screen of an operator. A Web operator must make a request that a specific user would start streaming, but a user can also start transmitting a stream on their own.</p>
+
+                            <h3 class="subsection">Requesting a Stream</h3>
+                            <div class="steps-container">
+                                <div class="step-item"><div class="step-num">1</div><div class="step-text">Open a <strong>Units</strong> menu.</div></div>
+                                <div class="step-item"><div class="step-num">2</div><div class="step-text">Request a stream directly from the users list by clicking the stream icon next to the specific user.</div></div>
+                                <div class="step-item"><div class="step-num">3</div><div class="step-text">Or select a user in the list and request a stream by clicking the stream icon in the user information menu.</div></div>
+                            </div>
+                            <div class="alert-box success">
+                                <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/></svg>
+                                <div><strong>Result:</strong> After requesting a stream from the web app, a user with the mobile app gets a notification about the request.</div>
+                            </div>
+                        </div>
+                        <div class="video-col">
+                            <div class="video-card" onclick="openVideoWindow('videos/RequestingStream.mp4')" role="button" tabindex="0">
+                                <video src="videos/RequestingStream.mp4" preload="metadata"></video>
+                                <div class="video-overlay"><div class="play-btn"></div></div>
+                                <div class="video-tag">Click to expand</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <!-- ==================== MESSAGING ==================== -->
             <div class="doc-section" id="messaging">
                 <div class="section-card">
@@ -1444,7 +1485,7 @@
                 <div class="section-card">
                     <div class="section-title">
                         <div class="title-icon bg-red-100 text-red-600">
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.25 4A2.25 2.25 0 001 6.25v7.5A2.25 2.25 0 003.25 16h7.5A2.25 2.25 0 0013 13.75v-7.5A2.25 2.25 0 0010.75 4h-7.5zM19 4.75a.75.75 0 00-1.28-.53l-3 3a.75.75 0 00-.22.53v4.5c0 .199.079.39.22.53l3 3a.75.75 0 001.28-.53V4.75z" clip-rule="evenodd"/></svg>
                         </div>
                         Mobile App - Streaming Video
                     </div>
