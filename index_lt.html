@@ -191,6 +191,36 @@
         #hamburger.open span:nth-child(3) { transform:rotate(-45deg) translate(2.5px,-2.5px); }
         #sidebar-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:999; }
 
+        /* ---- Language switch ---- */
+.language-switch {
+  display:flex; align-items:center; justify-content:space-between; gap:.75rem;
+  padding:.875rem 1rem; border-bottom:1px solid rgba(255,255,255,.08);
+}
+.language-switch-label {
+  font-size:.6875rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+  color:#94a3b8;
+}
+.language-switch-actions {
+  display:flex; align-items:center; gap:.5rem;
+}
+.language-switch-link {
+  display:inline-flex; align-items:center; gap:.4rem;
+  padding:.375rem .625rem; border:1px solid #334155; border-radius:9999px;
+  background:#1e293b; color:#cbd5e1; text-decoration:none;
+  font-size:.75rem; font-weight:600; line-height:1;
+  transition:all .2s;
+}
+.language-switch-link:hover {
+  background:#334155; color:#f8fafc; border-color:#475569;
+}
+.language-switch-link.active {
+  background:#2563eb; color:#fff; border-color:#60a5fa;
+  box-shadow:0 0 0 3px rgba(96,165,250,.15);
+}
+.language-switch-flag {
+  font-size:.95rem; line-height:1;
+}
+        
    /* ---- Search ---- */
 .sidebar-search { padding: .75rem 1rem; position: relative; }
 
@@ -272,6 +302,22 @@
 <path d="M237.166 238.784C267.497 208.621 267.724 159.492 237.392 129.329C207.185 99.0413 157.984 98.8155 127.777 129.103C97.4446 159.266 97.4451 208.621 127.777 238.784C157.984 269.072 206.959 269.072 237.166 238.784Z" fill="white"></path>
 </svg>
 </div>
+
+<!-- Language switch -->
+<div class="language-switch">
+  <div class="language-switch-label">Kalba</div>
+  <div class="language-switch-actions">
+    <a class="language-switch-link" href="mapli_user_guide_en.html" aria-label="Open English version">
+      <span class="language-switch-flag">🇬🇧</span>
+      <span>Anglų</span>
+    </a>
+    <a class="language-switch-link active" href="mapli_user_guide_lt_switch.html" aria-label="Open Lithuanian version">
+      <span class="language-switch-flag">🇱🇹</span>
+      <span>Lietuvių</span>
+    </a>
+  </div>
+</div>
+        
 <!-- Search -->
 <div class="sidebar-search">
 <svg fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" fill-rule="evenodd"></path></svg>
