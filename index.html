@@ -344,7 +344,7 @@
                     </a>
                     <a href="#video-streams" class="nav-item" data-section="video-streams">
                         <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M3.25 4A2.25 2.25 0 001 6.25v7.5A2.25 2.25 0 003.25 16h7.5A2.25 2.25 0 0013 13.75v-7.5A2.25 2.25 0 0010.75 4h-7.5zM19 4.75a.75.75 0 00-1.28-.53l-3 3a.75.75 0 00-.22.53v4.5c0 .199.079.39.22.53l3 3a.75.75 0 001.28-.53V4.75z"/></svg>
-                        Streaming
+                        Video Streams
                     </a>
                     <a href="#messaging" class="nav-item" data-section="messaging">
                         <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.43 2.524A41.29 41.29 0 0110 2c2.236 0 4.43.18 6.57.524 1.437.231 2.43 1.49 2.43 2.902v5.148c0 1.413-.993 2.67-2.43 2.902a41.102 41.102 0 01-3.55.414c-.28.02-.521.18-.643.413l-1.712 3.293a.75.75 0 01-1.33 0l-1.713-3.293a.783.783 0 00-.642-.413 41.108 41.108 0 01-3.55-.414C1.993 13.245 1 11.986 1 10.574V5.426c0-1.413.993-2.67 2.43-2.902z" clip-rule="evenodd"/></svg>
@@ -1029,16 +1029,50 @@
                                 <li>When activated: notifications are sent to all mobile users, a banner appears in the web interface, and the action is logged.</li>
                             </ul>
 
-                            <h3 class="subsection">Adding an Evacuation Route</h3>
-                            <div class="steps-container">
-                                <div class="step-item"><div class="step-num">1</div><div class="step-text">Click <strong>Add Route</strong> in the Evacuation panel.</div></div>
-                                <div class="step-item"><div class="step-num">2</div><div class="step-text">On the map, click to set the starting point, then click again to set the endpoint.</div></div>
-                                <div class="step-item"><div class="step-num">3</div><div class="step-text">The route will display length and estimated travel time.</div></div>
-                                <div class="step-item"><div class="step-num">4</div><div class="step-text">Repeat for additional routes, then click <strong>Save All</strong>.</div></div>
-                            </div>
+<h3 class="subsection">Adding an Automated Evacuation Route</h3>
+<div class="steps-container">
+    <div class="step-item"><div class="step-num">1</div><div class="step-text">In the Evacuation panel, click the <strong>Automatic Route Drawing</strong> option.</div></div>
+    <div class="step-item"><div class="step-num">2</div><div class="step-text">Pick an evacuation method:
+        <ul class="mt-2 ml-1 space-y-1">
+            <li><strong>Walking</strong> – creates a route accessible to pedestrians;</li>
+            <li><strong>Cycling</strong> – creates a route accessible to cyclists;</li>
+            <li><strong>Driving</strong> – creates a route on roadways.</li>
+        </ul>
+    </div></div>
+    <div class="step-item"><div class="step-num">3</div><div class="step-text">On the map, create the evacuation route by clicking:
+        <ul class="mt-2 ml-1 space-y-1">
+            <li><strong>First click</strong> – sets the starting point of the route;</li>
+            <li><strong>Second click</strong> – sets the endpoint (toward an exit or safe zone).</li>
+        </ul>
+    </div></div>
+    <div class="step-item"><div class="step-num">4</div><div class="step-text">The route will appear on the panel with the route length and estimated travel time.</div></div>
+    <div class="step-item"><div class="step-num">5</div><div class="step-text">Edit the route if needed — move the start or end pointer on the map, or change the route name and point names.</div></div>
+    <div class="step-item"><div class="step-num">6</div><div class="step-text">Click <strong>Save</strong> to store the route.</div></div>
+    <div class="step-item"><div class="step-num">7</div><div class="step-text">Repeat the process to draw as many routes as needed.</div></div>
+</div>
 
-                            <h3 class="subsection">Editing Routes</h3>
-                            <p class="text-slate-600 text-[.9375rem]">Each route can be edited directly from the panel. Modify the path or change the mode of travel (Walking, Cycling, or Driving).</p>
+<h3 class="subsection">Adding a Manual Evacuation Route</h3>
+<p class="text-slate-600 text-[.9375rem]">Instead of having the system generate a path automatically, you can configure the evacuation route manually. This is useful when the best route does not follow existing roads or pedestrian paths.</p>
+<div class="steps-container">
+    <div class="step-item"><div class="step-num">1</div><div class="step-text">In the Evacuation panel, click the <strong>Manual Route Drawing</strong> option.</div></div>
+    <div class="step-item"><div class="step-num">2</div><div class="step-text">On the map, create the evacuation route by clicking:
+        <ul class="mt-2 ml-1 space-y-1">
+            <li><strong>First click</strong> – sets the starting point of the route;</li>
+            <li><strong>Clicks after first</strong> – set the route path;</li>
+            <li><strong>Last click</strong> – sets the endpoint of the route.</li>
+        </ul>
+    </div></div>
+    <div class="step-item"><div class="step-num">3</div><div class="step-text">Edit the route if needed — move the start or end pointer on the map, or change the route name and point names.</div></div>
+    <div class="step-item"><div class="step-num">4</div><div class="step-text">Click <strong>Save</strong> to store the route.</div></div>
+    <div class="step-item"><div class="step-num">5</div><div class="step-text">Repeat the process to draw as many routes as needed.</div></div>
+</div>
+
+<div class="alert-box success">
+    <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/></svg>
+    <div><strong>Result:</strong> Once evacuation routes are created and saved, they will be displayed on the event map for quick access during emergencies. Evacuation Mode can be activated at any time to alert users and start the procedure.</div>
+</div>
+
+                      
                         </div>
                         <div class="video-col">
                             <div class="video-card" onclick="openVideoWindow('videos/Evacuation.mp4')" role="button" tabindex="0">
