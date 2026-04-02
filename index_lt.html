@@ -1,0 +1,1867 @@
+<!DOCTYPE html>
+
+<html lang="lt">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mapli naudotojo vadovas</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { jakarta: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'] },
+                    colors: {
+                        brand: { 50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',300:'#93c5fd',400:'#60a5fa',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a' },
+                        sidebar: { DEFAULT:'#0f172a', light:'#1e293b', lighter:'#334155' },
+                        surface: { DEFAULT:'#f8fafc', card:'#ffffff', border:'#e2e8f0' }
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; }
+        body { font-family:'Plus Jakarta Sans',system-ui,sans-serif; background:#f8fafc; color:#1e293b; }
+
+        /* ---- Progress bar ---- */
+        #reading-progress { position:fixed; top:0; left:0; height:3px; background:linear-gradient(90deg,#2563eb,#60a5fa); z-index:9999; transition:width .15s linear; width:0; }
+
+     /* ---- Sidebar ---- */
+#sidebar {
+  width: 280px; position: fixed; top: 0; left: 0; bottom: 0;
+  background: #0f172a; z-index: 1000; display: flex;
+  flex-direction: column; transition: transform .3s cubic-bezier(.4,0,.2,1);
+}
+#sidebar-nav {
+  flex: 1; overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: #475569 transparent; /* was #334155 */
+}
+#sidebar-nav::-webkit-scrollbar { width: 4px; }
+#sidebar-nav::-webkit-scrollbar-track { background: transparent; }
+#sidebar-nav::-webkit-scrollbar-thumb {
+  background: #475569; /* was #334155 */
+  border-radius: 4px;
+}
+
+.nav-group-title {
+  font-size: .65rem; font-weight: 700; letter-spacing: .12em;  /* was .1em — slightly more spread */
+  text-transform: uppercase;
+  color: #cbd5e1;                                               /* was #94a3b8 — matches inactive nav items */
+  padding: .75rem 1.25rem .375rem; user-select: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+  transition: color .2s;
+}
+.nav-group-title:hover { color: #f1f5f9; }                     /* was #e2e8f0 — brighter hover too */
+
+.nav-group-title svg { width: 14px; height: 14px; transition: transform .25s; }
+.nav-group-title.collapsed svg { transform: rotate(-90deg); }
+.nav-group-items {
+  overflow: hidden;
+  transition: max-height .35s cubic-bezier(.4,0,.2,1), opacity .25s;
+  max-height: 800px; opacity: 1;
+}
+.nav-group-items.collapsed { max-height: 0; opacity: 0; }
+
+.nav-item {
+  display: flex; align-items: center; gap: .625rem;
+  padding: .5rem 1.25rem; font-size: .8125rem;
+  color: #cbd5e1; /* was #94a3b8 — brighter for inactive items */
+  text-decoration: none; transition: all .2s;
+  border-left: 2px solid transparent; cursor: pointer; position: relative;
+}
+
+.nav-item:hover {
+  color: #f1f5f9;
+  background: rgba(255,255,255,.12); /* was .06 — 2× brighter, clearly visible */
+}
+
+.nav-item.active {
+  color: #ffffff;
+  background: rgba(37,99,235,.28);   /* was .15 — much more visible blue wash */
+  border-left: 3px solid #60a5fa;    /* wider + lighter blue, pops more on dark bg */
+  border-radius: 0 6px 6px 0;        /* subtle rounding on the right side only */
+}
+
+.nav-item .nav-icon {
+  width: 18px; height: 18px; flex-shrink: 0;
+  opacity: .75; /* was .6 — less faded */
+}
+.nav-item.active .nav-icon { opacity: 1; }
+
+
+        /* ---- Main content ---- */
+        #main-content { margin-left:280px; min-height:100vh; }
+        .content-header { position:sticky; top:0; z-index:100; background:rgba(248,250,252,.85); backdrop-filter:blur(12px); border-bottom:1px solid #e2e8f0; padding:.75rem 2.5rem; display:flex; align-items:center; justify-content:space-between; }
+        .breadcrumb { font-size:.8125rem; color:#64748b; display:flex; align-items:center; gap:.375rem; }
+        .breadcrumb span { color:#2563eb; font-weight:600; }
+        .content-body { padding:2rem 2.5rem 4rem; max-width:1200px; }
+
+        /* ---- Sections ---- */
+        .doc-section { margin-bottom:3rem; opacity:0; transform:translateY(24px); transition:opacity .6s cubic-bezier(.4,0,.2,1), transform .6s cubic-bezier(.4,0,.2,1); }
+        .doc-section.visible { opacity:1; transform:translateY(0); }
+        .section-card { background:#fff; border-radius:16px; border:1px solid #e2e8f0; padding:2.5rem; box-shadow:0 1px 3px rgba(0,0,0,.04); transition:box-shadow .3s, transform .3s; }
+        .section-card:hover { box-shadow:0 8px 30px rgba(0,0,0,.06); }
+
+        .section-title { font-size:1.75rem; font-weight:800; color:#0f172a; margin-bottom:.375rem; display:flex; align-items:center; gap:.75rem; letter-spacing:-.02em; }
+        .section-title .title-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.125rem; flex-shrink:0; }
+        .section-divider { height:3px; width:48px; background:linear-gradient(90deg,#2563eb,#60a5fa); border-radius:3px; margin-bottom:1.75rem; }
+
+        h3.subsection { font-size:1.25rem; font-weight:700; color:#0f172a; margin:2rem 0 .875rem; letter-spacing:-.01em; }
+        h4.sub-subsection { font-size:1.0625rem; font-weight:600; color:#334155; margin:1.5rem 0 .75rem; }
+
+        /* ---- Content grid (text + video) ---- */
+        .content-grid { display:grid; grid-template-columns:1fr 380px; gap:2rem; align-items:start; margin:1.5rem 0; }
+        .video-col { position:sticky; top:80px; }
+
+        /* ---- Video panels ---- */
+        .video-card { position:relative; border-radius:12px; overflow:hidden; background:#000; cursor:pointer; aspect-ratio:16/9; box-shadow:0 4px 20px rgba(0,0,0,.15); transition:transform .35s cubic-bezier(.4,0,.2,1), box-shadow .35s; }
+        .video-card:hover { transform:translateY(-4px) scale(1.01); box-shadow:0 12px 40px rgba(0,0,0,.25); }
+        .video-card video { width:100%; height:100%; object-fit:cover; pointer-events:none; }
+        .video-overlay { position:absolute; inset:0; background:linear-gradient(135deg,rgba(15,23,42,.5),rgba(37,99,235,.3)); display:flex; align-items:center; justify-content:center; transition:background .3s; }
+        .video-card:hover .video-overlay { background:linear-gradient(135deg,rgba(15,23,42,.35),rgba(37,99,235,.2)); }
+        .play-btn { width:56px; height:56px; background:rgba(255,255,255,.95); border-radius:50%; display:flex; align-items:center; justify-content:center; transition:transform .25s, box-shadow .25s; box-shadow:0 4px 20px rgba(0,0,0,.2); }
+        .video-card:hover .play-btn { transform:scale(1.12); box-shadow:0 6px 30px rgba(0,0,0,.3); }
+        .play-btn::after { content:''; width:0; height:0; border-left:18px solid #2563eb; border-top:11px solid transparent; border-bottom:11px solid transparent; margin-left:3px; }
+        .video-tag { position:absolute; bottom:10px; left:10px; background:rgba(0,0,0,.65); backdrop-filter:blur(4px); color:#fff; padding:.25rem .625rem; border-radius:6px; font-size:.6875rem; font-weight:500; }
+
+        /* ---- Steps ---- */
+        .steps-container { background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:1.5rem 1.5rem 1.5rem 2.5rem; margin:1rem 0; }
+        .step-item { position:relative; padding:0 0 1.25rem 2rem; }
+        .step-item:last-child { padding-bottom:0; }
+        .step-item::before { content:''; position:absolute; left:11px; top:28px; bottom:0; width:2px; background:#e2e8f0; }
+        .step-item:last-child::before { display:none; }
+        .step-num { position:absolute; left:0; top:2px; width:24px; height:24px; background:#2563eb; color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.75rem; font-weight:700; flex-shrink:0; box-shadow:0 2px 8px rgba(37,99,235,.3); }
+        .step-text { font-size:.9375rem; color:#334155; line-height:1.6; }
+
+        /* ---- Alert boxes ---- */
+        .alert-box { border-radius:10px; padding:1rem 1.25rem; margin:1rem 0; display:flex; gap:.75rem; align-items:flex-start; font-size:.9375rem; }
+        .alert-box.success { background:#ecfdf5; border:1px solid #a7f3d0; color:#065f46; }
+        .alert-box.info { background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af; }
+        .alert-box.warning { background:#fffbeb; border:1px solid #fde68a; color:#92400e; }
+        .alert-box .alert-icon { width:20px; height:20px; flex-shrink:0; margin-top:1px; }
+
+        /* ---- Tables ---- */
+        .doc-table { width:100%; border-collapse:separate; border-spacing:0; margin:1rem 0; border-radius:10px; overflow:hidden; border:1px solid #e2e8f0; font-size:.9375rem; }
+        .doc-table th { background:#f1f5f9; font-weight:600; color:#0f172a; text-align:left; padding:.75rem 1rem; border-bottom:2px solid #e2e8f0; }
+        .doc-table td { padding:.75rem 1rem; border-bottom:1px solid #f1f5f9; color:#334155; }
+        .doc-table tr:nth-child(even) td { background:#fafbfc; }
+        .doc-table tr:hover td { background:#eff6ff; }
+        .doc-table tr:last-child td { border-bottom:none; }
+
+        /* ---- Feature grid ---- */
+        .feature-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:1rem; margin:1rem 0; }
+        .feature-card { background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:1.25rem; transition:transform .25s, box-shadow .25s, border-color .25s; cursor:default; }
+        .feature-card:hover { transform:translateY(-3px); box-shadow:0 8px 25px rgba(0,0,0,.06); border-color:#bfdbfe; }
+        .feature-card h4 { font-size:.9375rem; font-weight:700; color:#0f172a; margin-bottom:.375rem; }
+        .feature-card p { font-size:.8125rem; color:#64748b; line-height:1.5; }
+
+        /* ---- Lists ---- */
+        .doc-list { margin:.75rem 0; padding-left:0; list-style:none; }
+        .doc-list li { position:relative; padding:.375rem 0 .375rem 1.5rem; font-size:.9375rem; color:#334155; }
+        .doc-list li::before { content:''; position:absolute; left:0; top:.75rem; width:6px; height:6px; background:#2563eb; border-radius:50%; }
+        .doc-list.nested { padding-left:1.25rem; }
+        .doc-list.nested li::before { background:#94a3b8; width:5px; height:5px; }
+
+        /* ---- Separator ---- */
+        .section-sep { border:none; border-top:1px solid #e2e8f0; margin:2rem 0; }
+
+        /* ---- Back to top ---- */
+        #back-to-top { position:fixed; bottom:2rem; right:2rem; width:44px; height:44px; background:#2563eb; color:#fff; border:none; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 15px rgba(37,99,235,.35); opacity:0; transform:translateY(16px); transition:opacity .3s, transform .3s, background .2s; z-index:999; }
+        #back-to-top.visible { opacity:1; transform:translateY(0); }
+        #back-to-top:hover { background:#1d4ed8; transform:translateY(-2px); }
+
+        /* ---- Modal ---- */
+        .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.9); z-index:9000; align-items:center; justify-content:center; padding:2rem; }
+        .modal.active { display:flex; }
+        .modal-inner { position:relative; width:100%; max-width:1000px; aspect-ratio:16/9; background:#000; border-radius:12px; overflow:hidden; }
+        .modal-inner video { width:100%; height:100%; }
+        .modal-close { position:absolute; top:-48px; right:0; background:none; border:none; color:#fff; font-size:2rem; cursor:pointer; padding:.5rem; transition:color .2s; }
+        .modal-close:hover { color:#60a5fa; }
+
+        /* ---- Hamburger ---- */
+        #hamburger { display:none; position:fixed; top:.875rem; left:.875rem; z-index:1100; width:40px; height:40px; background:#0f172a; border:none; border-radius:10px; cursor:pointer; flex-direction:column; align-items:center; justify-content:center; gap:5px; box-shadow:0 2px 10px rgba(0,0,0,.15); }
+        #hamburger span { display:block; width:18px; height:2px; background:#fff; border-radius:2px; transition:all .25s; }
+        #hamburger.open span:nth-child(1) { transform:rotate(45deg) translate(2.5px,2.5px); }
+        #hamburger.open span:nth-child(2) { opacity:0; }
+        #hamburger.open span:nth-child(3) { transform:rotate(-45deg) translate(2.5px,-2.5px); }
+        #sidebar-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:999; }
+
+   /* ---- Search ---- */
+.sidebar-search { padding: .75rem 1rem; position: relative; }
+
+.sidebar-search input {
+  width: 100%;
+  background: #1e3a5f;                        /* was #1e293b — blue-tinted, stands out from sidebar */
+  border: 1px solid #3b5a8a;                  /* was #334155 — clearly visible border */
+  border-radius: 8px;
+  padding: .5rem .75rem .5rem 2.25rem;
+  color: #f1f5f9;                             /* was #e2e8f0 — slightly brighter text */
+  font-size: .8125rem;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s, background .2s;
+  font-family: inherit;
+}
+
+.sidebar-search input::placeholder {
+  color: #94a3b8;                             /* was #64748b — much more readable */
+}
+
+.sidebar-search input:focus {
+  background: #1e3f6e;                        /* slightly lighter on focus */
+  border-color: #60a5fa;                      /* was #2563eb — matches active item border */
+  box-shadow: 0 0 0 3px rgba(96,165,250,.2);  /* was .15 — more visible glow, matches border color */
+}
+
+.sidebar-search svg {
+  position: absolute; left: 1.625rem; top: 50%;
+  transform: translateY(-50%);
+  width: 14px; height: 14px;
+  color: #94a3b8;                             /* was #64748b — matches placeholder brightness */
+  pointer-events: none;
+}
+
+
+        /* ---- Responsive ---- */
+        @media (max-width:1024px) {
+            .content-grid { grid-template-columns:1fr; }
+            .video-col { position:relative; top:0; }
+        }
+        @media (max-width:768px) {
+            #sidebar { transform:translateX(-100%); z-index:1100; }
+            #sidebar.open { transform:translateX(0); }
+            #sidebar-backdrop.open { display:block; }
+            #main-content { margin-left:0; }
+            #hamburger { display:flex; }
+            .content-header { padding:.75rem 1rem .75rem 3.5rem; }
+            .content-body { padding:1.5rem 1rem 3rem; }
+            .section-card { padding:1.5rem; border-radius:12px; }
+            .section-title { font-size:1.375rem; }
+        }
+
+        /* ---- Print ---- */
+        @media print {
+            #sidebar, #hamburger, #back-to-top, #reading-progress, .content-header, .video-card, .modal { display:none !important; }
+            #main-content { margin-left:0 !important; }
+            .doc-section { opacity:1 !important; transform:none !important; }
+        }
+    </style>
+</head>
+<body>
+<!-- Reading progress -->
+<div id="reading-progress"></div>
+<!-- Hamburger (mobile) -->
+<button aria-label="Perjungti meniu" id="hamburger"><span></span><span></span><span></span></button>
+<div id="sidebar-backdrop"></div>
+<!-- ========== SIDEBAR ========== -->
+<aside id="sidebar">
+<!-- Logo -->
+<div class="flex items-center gap-2.5 px-5 py-5 border-b border-white/[.08]">
+<svg fill="none" height="45" viewbox="0 0 1374 519" width="120" xmlns="http://www.w3.org/2000/svg">
+<path d="M1226.16 363.844H1280.27V228.97C1280.27 98.7333 1279.88 94.0958 1272.15 84.0479C1265.58 75.5458 1261.33 74 1245.09 74H1226.16V363.844Z" fill="white"></path>
+<path d="M1318.92 116.51H1373.03V102.984C1373.03 82.8886 1362.21 74 1338.24 74H1318.92V116.51Z" fill="white"></path>
+<path d="M502.617 143.176C482.132 149.746 464.353 163.658 455.85 179.89C448.12 194.575 447.347 201.531 446.187 279.596L445.028 363.844H499.139L500.298 284.233C501.458 206.169 501.458 204.623 510.734 197.28C523.488 186.846 554.795 187.232 565.231 197.667C572.575 205.009 572.961 210.42 572.961 284.62V363.844H630.937V286.552C630.937 209.26 630.937 208.874 640.6 199.599C652.581 187.232 679.637 186.073 693.164 197.28C702.054 204.623 702.441 206.555 704.373 278.823C706.692 364.23 706.306 363.844 742.251 363.844H763.122L761.576 283.46C759.643 194.961 756.165 179.117 734.521 160.953C708.625 138.925 649.489 133.901 617.023 150.519C603.495 157.475 602.722 157.475 587.648 150.132C570.256 141.244 520.396 137.379 502.617 143.176Z" fill="white"></path>
+<path d="M843.515 143.949C818.392 151.678 803.705 166.75 795.588 192.643C792.883 201.145 793.656 201.531 818.392 201.531C838.491 201.531 846.607 199.599 853.951 193.802C866.319 184.141 896.08 183.368 908.448 192.256C928.16 206.169 913.473 218.922 868.252 226.651C831.533 233.221 804.478 245.974 796.361 260.659C781.288 288.871 786.699 325.971 808.73 346.067C826.509 361.911 841.196 365.39 881.779 363.071C905.743 361.525 915.792 359.206 929.706 351.091C963.718 330.995 971.062 311.672 971.062 240.564C971.062 176.411 967.197 165.591 938.596 151.678C916.951 140.857 867.092 136.993 843.515 143.949ZM911.154 298.146C895.307 329.063 843.515 327.903 843.515 296.6C843.515 277.664 850.472 271.867 884.098 262.205L915.019 253.317L916.178 269.934C916.951 279.596 914.632 291.19 911.154 298.146Z" fill="white"></path>
+<path d="M1058.41 145.108C1029.42 155.929 1009.71 176.798 1001.98 205.009C999.664 212.739 998.118 268.002 998.118 331.768V445H1017.44C1049.14 445 1052.23 439.203 1052.23 381.234V333.314L1061.89 342.975C1090.88 371.573 1142.28 370.414 1172.82 339.883C1193.3 319.401 1200.26 292.735 1198.33 242.496C1196.39 190.324 1184.8 167.909 1150.79 150.132C1130.69 139.698 1080.06 136.993 1058.41 145.108ZM1115.62 189.938C1148.08 202.304 1154.65 279.209 1125.28 303.943C1105.18 320.56 1075.42 315.536 1061.5 293.122C1051.07 275.345 1051.07 223.946 1061.89 206.555C1072.71 188.392 1094.36 181.822 1115.62 189.938Z" fill="white"></path>
+<path d="M1318.92 363.844H1373.03V259.5C1373.03 160.18 1372.64 154.77 1365.3 147.427C1359.5 141.63 1352.54 139.698 1338.24 139.698H1318.92V363.844Z" fill="white"></path>
+<path d="M0.527832 187.831C0.527832 375.662 126.528 519 184.528 519C242.528 519 329.028 365.5 329.028 365.5C329.028 365.5 319.028 293.5 270.528 300C222.028 306.5 148.528 332 91.7422 272.455C43.0278 222 44.1698 144.151 94.5278 94C140.528 48.1894 220.67 43.8493 271.028 94C295.907 118.776 310.543 149.756 309.528 185C309.703 224.829 301.028 237.778 307.528 264C313.167 286.75 355.028 284 355.028 284C355.028 284 365.028 254.5 365.028 185.355C365.028 81.6188 295.462 0 190.528 0C85.5937 0 0.527832 84.0948 0.527832 187.831Z" fill="white"></path>
+<path d="M237.166 238.784C267.497 208.621 267.724 159.492 237.392 129.329C207.185 99.0413 157.984 98.8155 127.777 129.103C97.4446 159.266 97.4451 208.621 127.777 238.784C157.984 269.072 206.959 269.072 237.166 238.784Z" fill="white"></path>
+</svg>
+</div>
+<!-- Search -->
+<div class="sidebar-search">
+<svg fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" fill-rule="evenodd"></path></svg>
+<input autocomplete="off" id="sidebar-search" placeholder="Ieškoti skyrių..." type="text"/>
+</div>
+<!-- Navigation -->
+<nav id="sidebar-nav">
+<!-- Web Platform -->
+<div class="nav-group" data-group="web">
+<div class="nav-group-title" onclick="toggleGroup(this)">
+                    Žiniatinklio platforma
+                    <svg fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" fill-rule="evenodd"></path></svg>
+</div>
+<div class="nav-group-items">
+<a class="nav-item" data-section="module1" href="#module1">
+<svg class="nav-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z"></path></svg>
+                        Platformos apžvalga
+                    </a>
+<a class="nav-item" data-section="module2" href="#module2">
+<svg class="nav-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75z" fill-rule="evenodd"></path></svg>
+                        Planuoti įvykį
+                    </a>
+<a class="nav-item" data-section="groups-users" href="#groups-users">
+<svg class="nav-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M7 8a3 3 0 100-6 3 3 0 000 6zM14.5 9a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM1.615 16.428a1.224 1.224 0 01-.569-1.175 6.002 6.002 0 0111.908 0c.058.467-.172.92-.57 1.174A9.953 9.953 0 017 18a9.953 9.953 0 01-5.385-1.572zM14.5 16h-.106c.07-.297.088-.611.048-.933a7.47 7.47 0 00-1.588-3.755 4.502 4.502 0 015.874 2.636.818.818 0 01-.36.98A7.465 7.465 0 0114.5 16z"></path></svg>
+                        Grupės ir naudotojai
+                    </a>
+<a class="nav-item" data-section="devices" href="#devices">
+<svg class="nav-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M13 4.5a2.5 2.5 0 11.702 1.737L6.97 9.604a2.5 2.5 0 110 .792l6.733 3.367a2.5 2.5 0 11-.67 1.341L6.3 11.737a2.5 2.5 0 010-3.474l6.733-3.367A2.494 2.494 0 0113 4.5z"></path></svg>
+                        Įrenginiai
+                    </a>
+<a class="nav-item" data-section="media-sources" href="#media-sources">
+<svg class="nav-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M3.25 4A2.25 2.25 0 001 6.25v7.5A2.25 2.25 0 003.25 16h7.5A2.25 2.25 0 0013 13.75v-7.5A2.25 2.25 0 0010.75 4h-7.5zM19 4.75a.75.75 0 00-1.28-.53l-3 3a.75.75 0 00-.22.53v4.5c0 .199.079.39.22.53l3 3a.75.75 0 001.28-.53V4.75z"></path></svg>
+                        Medijos šaltiniai
+                    </a>
+<a class="nav-item" data-section="zones-sectors" href="#zones-sectors">
+<svg class="nav-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M8.157 2.175a1.5 1.5 0 00-1.147 0l-4.084 1.69A1.5 1.5 0 002 5.251v10.877a.75.75 0 001.074.676l3.502-1.69 4.007 1.671a1.5 1.5 0 001.147 0l3.344-1.39a.75.75 0 000-1.378l-3.344-1.39a1.5 1.5 0 00-1.147 0L7.08 14.218l-3.58 1.73V5.25l4.084-1.69 4.007 1.671a1.5 1.5 0 001.147 0l3.344-1.39a.75.75 0 000-1.378l-3.344-1.39a1.5 1.5 0 00-1.147 0L8.157 2.175z" fill-rule="evenodd"></path></svg>
+                        Zonos ir sektoriai
+                    </a>
+<a class="nav-item" data-section="tasks" href="#tasks">
+<svg class="nav-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M2.5 3A1.5 1.5 0 001 4.5v4A1.5 1.5 0 002.5 10h6A1.5 1.5 0 0010 8.5v-4A1.5 1.5 0 008.5 3h-6zm11 2A1.5 1.5 0 0012 6.5v7a1.5 1.5 0 001.5 1.5h4a1.5 1.5 0 001.5-1.5v-7A1.5 1.5 0 0017.5 5h-4zm-10 7A1.5 1.5 0 002 13.5v2A1.5 1.5 0 003.5 17h5A1.5 1.5 0 0010 15.5v-2A1.5 1.5 0 008.5 12h-5z" fill-rule="evenodd"></path></svg>
+                        Užduotys
+                    </a>
+<a class="nav-item" data-section="event-plan" href="#event-plan">
+<svg class="nav-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M4.5 2A1.5 1.5 0 003 3.5v13A1.5 1.5 0 004.5 18h11a1.5 1.5 0 001.5-1.5V7.621a1.5 1.5 0 00-.44-1.06l-4.12-4.122A1.5 1.5 0 0011.378 2H4.5zm2.25 8.5a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-6.5zm0 3a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-6.5z" fill-rule="evenodd"></path></svg>
+                        Įvykio planas
+                    </a>
+<a class="nav-item" data-section="evacuation-plan" href="#evacuation-plan">
+<svg class="nav-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" fill-rule="evenodd"></path></svg>
+                        Evakuacijos planas
+                    </a>
+<a class="nav-item" data-section="incidents" href="#incidents">
+<svg class="nav-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M2.22 2.22a.75.75 0 011.06 0l4.46 4.46h.06l6.98-3.99A.75.75 0 0116 3.377V5.22l1.72-1.72a.75.75 0 011.06 1.06L2.22 21.12a.75.75 0 01-1.06-1.06l3-3H2.75a.75.75 0 01-.75-.75v-3.5a.75.75 0 01.35-.637l5.657-3.56z"></path></svg>
+                        Incidentai
+                    </a>
+<a class="nav-item" data-section="activity-log" href="#activity-log">
+<svg class="nav-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M10 2a6 6 0 00-6 6c0 1.887-.454 3.665-1.257 5.234a.75.75 0 00.515 1.076 32.91 32.91 0 003.256.508 3.5 3.5 0 006.972 0 32.903 32.903 0 003.256-.508.75.75 0 00.515-1.076A11.448 11.448 0 0116 8a6 6 0 00-6-6zm0 14.5a2 2 0 01-1.95-1.557 33.54 33.54 0 003.9 0A2 2 0 0110 16.5z" fill-rule="evenodd"></path></svg>
+                        Veiksmų žurnalas
+                    </a>
+<a class="nav-item" data-section="realtime-locations" href="#realtime-locations">
+<svg class="nav-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.145c.186-.1.429-.241.71-.424.56-.366 1.301-.904 2.044-1.617C14.77 15.372 16.5 13 16.5 10a6.5 6.5 0 10-13 0c0 3 1.73 5.372 3.13 6.736.744.713 1.484 1.251 2.045 1.617a13.6 13.6 0 00.99.57l.019.007.006.003zM10 11.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" fill-rule="evenodd"></path></svg>
+                        Vietos realiuoju laiku
+                    </a>
+<a class="nav-item" data-section="tasks-review" href="#tasks-review">
+<svg class="nav-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M15.988 3.012A2.25 2.25 0 0118 5.25v6.5A2.25 2.25 0 0115.75 14H13.5V7A2.5 2.5 0 0011 4.5H8.128a2.252 2.252 0 011.884-1.488A2.25 2.25 0 0112.25 1h1.5a2.25 2.25 0 012.238 2.012zM11.5 3.25a.75.75 0 01.75-.75h1.5a.75.75 0 01.75.75v.25h-3v-.25z" fill-rule="evenodd"></path><path clip-rule="evenodd" d="M2 7a1 1 0 011-1h8a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V7zm2 3.25a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5a.75.75 0 01-.75-.75zm0 3.5a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5a.75.75 0 01-.75-.75z" fill-rule="evenodd"></path></svg>
+                        Užduočių peržiūra
+                    </a>
+<a class="nav-item" data-section="video-streams" href="#video-streams">
+<svg class="nav-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M3.25 4A2.25 2.25 0 001 6.25v7.5A2.25 2.25 0 003.25 16h7.5A2.25 2.25 0 0013 13.75v-7.5A2.25 2.25 0 0010.75 4h-7.5zM19 4.75a.75.75 0 00-1.28-.53l-3 3a.75.75 0 00-.22.53v4.5c0 .199.079.39.22.53l3 3a.75.75 0 001.28-.53V4.75z"></path></svg>
+                        Vaizdo srautai
+                    </a>
+<a class="nav-item" data-section="messaging" href="#messaging">
+<svg class="nav-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M3.43 2.524A41.29 41.29 0 0110 2c2.236 0 4.43.18 6.57.524 1.437.231 2.43 1.49 2.43 2.902v5.148c0 1.413-.993 2.67-2.43 2.902a41.102 41.102 0 01-3.55.414c-.28.02-.521.18-.643.413l-1.712 3.293a.75.75 0 01-1.33 0l-1.713-3.293a.783.783 0 00-.642-.413 41.108 41.108 0 01-3.55-.414C1.993 13.245 1 11.986 1 10.574V5.426c0-1.413.993-2.67 2.43-2.902z" fill-rule="evenodd"></path></svg>
+                        Pranešimai
+                    </a>
+<a class="nav-item" data-section="timeline" href="#timeline">
+<svg class="nav-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" fill-rule="evenodd"></path></svg>
+                        Laiko juosta
+                    </a>
+<a class="nav-item" data-section="orthophotos" href="#orthophotos">
+<svg class="nav-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" fill-rule="evenodd"></path></svg>
+                        Ortofotografijos
+                    </a>
+</div>
+</div>
+<!-- Mobile App -->
+<div class="nav-group" data-group="mobile">
+<div class="nav-group-title" onclick="toggleGroup(this)">
+                    Mobilioji programėlė
+                    <svg fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" fill-rule="evenodd"></path></svg>
+</div>
+<div class="nav-group-items">
+<a class="nav-item" data-section="mobile" href="#mobile">
+<svg class="nav-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M8 16.25a.75.75 0 01.75-.75h2.5a.75.75 0 010 1.5h-2.5a.75.75 0 01-.75-.75z"></path><path clip-rule="evenodd" d="M4 4a3 3 0 013-3h6a3 3 0 013 3v12a3 3 0 01-3 3H7a3 3 0 01-3-3V4zm3-1.5A1.5 1.5 0 005.5 4v12A1.5 1.5 0 007 17.5h6a1.5 1.5 0 001.5-1.5V4A1.5 1.5 0 0013 2.5H7z" fill-rule="evenodd"></path></svg>
+                        Vykdyti įvykį
+                    </a>
+<a class="nav-item" data-section="mobile-incidents" href="#mobile-incidents">
+<svg class="nav-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" fill-rule="evenodd"></path></svg>
+                        Incidentai
+                    </a>
+<a class="nav-item" data-section="mobile-streaming" href="#mobile-streaming">
+<svg class="nav-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M3.25 4A2.25 2.25 0 001 6.25v7.5A2.25 2.25 0 003.25 16h7.5A2.25 2.25 0 0013 13.75v-7.5A2.25 2.25 0 0010.75 4h-7.5zM19 4.75a.75.75 0 00-1.28-.53l-3 3a.75.75 0 00-.22.53v4.5c0 .199.079.39.22.53l3 3a.75.75 0 001.28-.53V4.75z" fill-rule="evenodd"></path></svg>
+                        Transliavimas
+                    </a>
+<a class="nav-item" data-section="mobile-messaging" href="#mobile-messaging">
+<svg class="nav-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M3.43 2.524A41.29 41.29 0 0110 2c2.236 0 4.43.18 6.57.524 1.437.231 2.43 1.49 2.43 2.902v5.148c0 1.413-.993 2.67-2.43 2.902a41.102 41.102 0 01-3.55.414c-.28.02-.521.18-.643.413l-1.712 3.293a.75.75 0 01-1.33 0l-1.713-3.293a.783.783 0 00-.642-.413 41.108 41.108 0 01-3.55-.414C1.993 13.245 1 11.986 1 10.574V5.426c0-1.413.993-2.67 2.43-2.902z" fill-rule="evenodd"></path></svg>
+                        Pranešimai
+                    </a>
+<a class="nav-item" data-section="mobile-evacuation" href="#mobile-evacuation">
+<svg class="nav-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 3.75a2 2 0 10-4 0 2 2 0 004 0zM17.25 11.5a.75.75 0 000-1.5h-4l-1.553-2.486A2.25 2.25 0 009.788 6.5H8.052a2.25 2.25 0 00-1.905 1.053L3.56 12.197a.75.75 0 001.267.806L6.782 9.8l1.693 4.233-2.647 4.94a.75.75 0 001.325.71L10 14.618l2.848 5.065a.75.75 0 001.324-.71l-2.647-4.94 1.218-3.044L14.25 11.5h3z"></path></svg>
+                        Evakuacija
+                    </a>
+</div>
+</div>
+<!-- Other -->
+<div class="nav-group" data-group="other">
+<div class="nav-group-title" onclick="toggleGroup(this)">
+                    Kita
+                    <svg fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" fill-rule="evenodd"></path></svg>
+</div>
+<div class="nav-group-items">
+<a class="nav-item" data-section="additional-modules" href="#additional-modules">
+<svg class="nav-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10.75 16.82A7.462 7.462 0 0115 15.5c.71 0 1.396.098 2.046.282A.75.75 0 0018 15.06V3.94a.75.75 0 00-.546-.722A9.006 9.006 0 0015 2.8a8.96 8.96 0 00-4.25 1.063v12.958zM9.25 4.863A8.96 8.96 0 005 3.8a9.006 9.006 0 00-2.454.418A.75.75 0 002 4.94v11.12a.75.75 0 00.954.722A7.462 7.462 0 015 16.5a7.46 7.46 0 014.25 1.32V4.863z"></path></svg>
+                        Papildomi moduliai
+                    </a>
+</div>
+</div>
+</nav>
+<!-- Sidebar footer -->
+<div class="px-5 py-3 border-t border-white/[.08] text-[.6875rem] text-slate-600">
+            v2.0 · Atnaujinta 2025
+        </div>
+</aside>
+<!-- ========== MAIN CONTENT ========== -->
+<div id="main-content">
+<!-- Sticky header bar -->
+<div class="content-header">
+<div class="breadcrumb">
+<svg class="text-slate-400" fill="currentColor" height="14" viewbox="0 0 20 20" width="14"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
+                Naudotojo vadovas  /  <span id="breadcrumb-section">Platformos apžvalga</span>
+</div>
+<div class="flex items-center gap-3 text-xs text-slate-500">
+<span id="progress-text">0%</span>
+<div class="w-24 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+<div class="h-full bg-brand-600 rounded-full transition-all duration-300" id="progress-bar-mini" style="width:0%"></div>
+</div>
+</div>
+</div>
+<!-- Content body -->
+<div class="content-body">
+<!-- ==================== MODULE 1 ==================== -->
+<div class="doc-section" id="module1">
+<div class="section-card">
+<div class="section-title">
+<div class="title-icon bg-blue-100 text-blue-600">
+<svg fill="currentColor" height="20" viewbox="0 0 20 20" width="20"><path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z"></path></svg>
+</div>
+                        1 modulis: platformos apžvalga ir navigacija
+                    </div>
+<div class="section-divider"></div>
+<h3 class="subsection">1. Išdėstymo apžvalga</h3>
+<h4 class="sub-subsection">Viršutinė juosta</h4>
+<ul class="doc-list">
+<li><strong>Įvykių išskleidžiamasis meniu:</strong> Rodo šiuo metu aktyvų įvykį. Šiame meniu galite perjungti įvykius.</li>
+<li><strong>Paieškos juosta:</strong> Naudojama konkretiems adresams ar vietoms žemėlapyje rasti. Įveskite bet kurį adresą, kad greitai ten pereitumėte.</li>
+<li><strong>Vaizdo parinkiklis:</strong>
+<ul class="doc-list nested">
+<li><strong>Žemėlapis:</strong> Rodo pagrindinį interaktyvų žemėlapio vaizdą.</li>
+<li><strong>Valdymo kambarys:</strong> Alternatyvus stebėjimo vaizdas.</li>
+</ul>
+</li>
+<li><strong>Naudotojas ir pranešimai (viršuje dešinėje):</strong>
+<ul class="doc-list nested">
+<li>Pranešimų varpelis rodo naujus pranešimus.</li>
+<li>Nustatymų piktograma atveria naudotojo nuostatas ir sistemos konfigūraciją.</li>
+</ul>
+</li>
+</ul>
+<h3 class="subsection">2. Kairysis šoninis meniu</h3>
+<p class="text-slate-600 text-[.9375rem] mb-3">Kairysis meniu suteikia prieigą prie visų sistemos operacinių sluoksnių:</p>
+<table class="doc-table">
+<thead>
+<tr><th>Meniu</th><th>Aprašymas</th></tr>
+</thead>
+<tbody>
+<tr><td>Informacija</td><td>Rodo bendrą informaciją apie įvykio detales.</td></tr>
+<tr><td>Sluoksniai</td><td>Valdo žemėlapio elementų matomumą (grupių, struktūrų, incidentų, užduočių, zonų, evakuacijos maršrutų).</td></tr>
+<tr><td>Užduotys</td><td>Pateikia ir valdo visas sukurtas užduotis. Galite jas peržiūrėti, redaguoti arba pridėti naujų.</td></tr>
+<tr><td>Incidentai</td><td>Rodo esamus ir ankstesnius incidentus žemėlapyje. Kiekvienas incidentas pažymėtas žymekliu.</td></tr>
+<tr><td>Vienetai</td><td>Rodo galimus vienetus (naudotojus) ir jų būseną.</td></tr>
+<tr><td>Žinutės</td><td>Atveria bendravimo pranešimų skydelį.</td></tr>
+<tr><td>Evakuacija</td><td>Suteikia įrankį evakuacijos maršrutams kurti ir valdyti.</td></tr>
+</tbody>
+</table>
+<h3 class="subsection">3. Žemėlapio elementai</h3>
+<ul class="doc-list">
+<li><strong>Sinchronizavimo mygtukas:</strong> Importuoja visas kameras iš FlexControl registro.</li>
+<li><strong>Monitoriaus mygtukas:</strong> Nukopijuoja žemėlapį į iškarpinę.</li>
+<li><strong>Pradžios mygtukas:</strong> Centruoja įvykį žemėlapyje.</li>
+<li><strong>Liniuotės mygtukas:</strong> Matuoja atstumą žemėlapyje.</li>
+<li><strong>Priartinimo / atitolinimo mygtukai:</strong> Keičia žemėlapio mastelį.</li>
+</ul>
+</div>
+</div>
+<!-- ==================== MODULE 2 ==================== -->
+<div class="doc-section" id="module2">
+<div class="section-card">
+<div class="section-title">
+<div class="title-icon bg-indigo-100 text-indigo-600">
+<svg fill="currentColor" height="20" viewbox="0 0 20 20" width="20"><path clip-rule="evenodd" d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75z" fill-rule="evenodd"></path></svg>
+</div>
+                        2 modulis: didelio lauko renginio planavimas ir valdymas
+                    </div>
+<div class="section-divider"></div>
+<!-- Create Event -->
+<div class="content-grid">
+<div>
+<h3 class="subsection">Planuoti įvykį</h3>
+<h4 class="sub-subsection" id="create-event">Sukurti operaciją (įvykį) nuo nulio</h4>
+<p class="text-slate-600 text-[.9375rem] mb-2"><strong>Kaip atidaryti įvykio kūrimą:</strong></p>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Pagrindinėje navigacijoje eikite į <strong>Platformos nustatymai → Įvykiai</strong>.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Spustelėkite <strong>Naujas įrašas</strong> mygtuką, esantį įvykių sąrašo viršuje.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Atsidarys įvykio kūrimo langas.</div></div>
+</div>
+<p class="text-slate-600 text-[.9375rem] mt-4 mb-2"><strong>Įvykio informacija (kairysis skydelis):</strong></p>
+<p class="text-slate-600 text-[.9375rem] mb-2">Naudokite kairėje ekrano pusėje esantį skydelį pagrindinėms įvykio detalėms apibrėžti:</p>
+<ul class="doc-list">
+<li><strong>Įvykio pavadinimas</strong> – Įveskite aiškų, apibūdinantį įvykio pavadinimą.</li>
+<li><strong>Aprašymas</strong> – Pateikite svarbias detales, tikslus ar pastabas.</li>
+<li><strong>Pradžios ir pabaigos data</strong> – Nustatykite laikotarpį, kuriuo įvykis bus aktyvus.</li>
+<li><strong>Grupės</strong> – Priskirkite esamas grupes, kurios dalyvaus įvykyje arba jį prižiūrės.</li>
+<li><strong>Naudotojai</strong> – Pridėkite atskirus naudotojus, kurie dalyvaus arba bus atsakingi už stebėjimą.</li>
+<li><strong>Įrenginiai</strong> – Įtraukite įrenginius (pvz., GPS sekiklius, dronus), kurie bus naudojami įvykio metu.</li>
+</ul>
+<p class="text-slate-600 text-[.9375rem] mt-4 mb-2"><strong>Žemėlapio įrankiai:</strong></p>
+<p class="text-slate-600 text-[.9375rem] mb-2">Dešinėje ekrano pusėje yra interaktyvus žemėlapis, kuriame galite apibrėžti geografinius įvykio aspektus:</p>
+<ul class="doc-list">
+<li><strong>Piešti sektorius</strong> – Apibrėžkite konkrečias zonas, kuriose vyks veiklos arba stebėjimas.</li>
+<li><strong>Piešti linijas</strong> – Pažymėkite maršrutus ar patruliavimo kelius, susijusius su įvykio vykdymu.</li>
+<li><strong>Dėti taškus</strong> – Pažymėkite konkrečias svarbias vietas, pvz., kontrolės punktus ar stebėjimo postus.</li>
+</ul>
+<div class="alert-box success">
+<svg class="alert-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" fill-rule="evenodd"></path></svg>
+<div><strong>Rezultatas:</strong> Kai visos detalės ir žemėlapio elementai sukonfigūruoti, spustelėkite <strong>Išsaugoti</strong> kad užbaigtumėte įvykio kūrimą. Naujas įvykis bus rodomas įvykių sąraše.</div>
+</div>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/video_01.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/video_01.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+<hr class="section-sep"/>
+<!-- Create Template -->
+<div class="content-grid">
+<div>
+<h4 class="sub-subsection" id="create-template">Sukurti šabloną nuo nulio</h4>
+<p class="text-slate-600 text-[.9375rem] mb-3">Įvykių šablonai leidžia iš anksto apibrėžti ir išsaugoti įvykio konfigūracijas, kurias vėliau galima pakartotinai naudoti naujiems įvykiams kurti greitai ir nuosekliai.</p>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Pagrindinėje navigacijoje eikite į <strong>Platformos nustatymai → Įvykiai</strong>.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Atidarykite <strong>Įvykių šablonai</strong> kortelę puslapio viršuje.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Spustelėkite <strong>Naujas įrašas</strong> mygtuką, kad pradėtumėte kurti naują šabloną.</div></div>
+</div>
+<p class="text-slate-600 text-[.9375rem] mt-4 mb-2"><strong>Šablono konfigūracija:</strong></p>
+<ul class="doc-list">
+<li><strong>Šablono pavadinimas</strong> – Įveskite apibūdinantį šablono pavadinimą.</li>
+<li><strong>Aprašymas</strong> – Pridėkite pastabų arba konteksto apie šablono paskirtį.</li>
+<li><strong>Grupės</strong> – Pridėkite vieną ar daugiau grupių, kurios bus susietos su šiuo šablonu.</li>
+<li>Žemėlapio srityje galite pridėti taškus, linijas ir sektorius.</li>
+</ul>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/TemplateCreation.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/TemplateCreation.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+<hr class="section-sep"/>
+<!-- Event from Template -->
+<div class="content-grid">
+<div>
+<h4 class="sub-subsection">Sukurti operaciją (įvykį) iš šablono</h4>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Eikite į <strong>Platformos nustatymai → Įvykiai → Įvykių šablonai</strong> kortelę.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Spustelėkite akies piktogramą, kad atidarytumėte šabloną.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Kairėje pusėje spustelėkite mygtuką Informacija, tada spustelėkite pliuso (+) piktogramą, kad sukurtumėte įvykį.</div></div>
+<div class="step-item"><div class="step-num">4</div><div class="step-text">Įveskite įvykio pavadinimą, pradžios datą ir pabaigos datą, tada spustelėkite <strong>Sukurti</strong>.</div></div>
+</div>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/EventCreationFromTemplate.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/EventCreationFromTemplate.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+<hr class="section-sep"/>
+<!-- Template from Event -->
+<div class="content-grid">
+<div>
+<h4 class="sub-subsection">Sukurti šabloną iš esamos operacijos</h4>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Eikite į <strong>Platformos nustatymai → Įvykiai</strong> ir suraskite įvykį.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Spustelėkite akies mygtuką, tada kairiajame skydelyje spustelėkite Informacija.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Spustelėkite „burger“ meniu ir pasirinkite „Sukurti šabloną iš šio įvykio“.</div></div>
+<div class="step-item"><div class="step-num">4</div><div class="step-text">Pakeiskite šablono pavadinimą ir datas, jei reikia, įtraukite užduotis, tada spustelėkite <strong>Sukurti</strong>.</div></div>
+</div>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/CreateTemplateFromEvent.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/CreateTemplateFromEvent.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ==================== GROUPS & USERS ==================== -->
+<div class="doc-section" id="groups-users">
+<div class="section-card">
+<div class="section-title">
+<div class="title-icon bg-violet-100 text-violet-600">
+<svg fill="currentColor" height="20" viewbox="0 0 20 20" width="20"><path d="M7 8a3 3 0 100-6 3 3 0 000 6zM14.5 9a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM1.615 16.428a1.224 1.224 0 01-.569-1.175 6.002 6.002 0 0111.908 0c.058.467-.172.92-.57 1.174A9.953 9.953 0 017 18a9.953 9.953 0 01-5.385-1.572zM14.5 16h-.106c.07-.297.088-.611.048-.933a7.47 7.47 0 00-1.588-3.755 4.502 4.502 0 015.874 2.636.818.818 0 01-.36.98A7.465 7.465 0 0114.5 16z"></path></svg>
+</div>
+                        Sukurti grupes ir naudotojus
+                    </div>
+<div class="section-divider"></div>
+<div class="content-grid">
+<div>
+<p class="text-slate-600 text-[.9375rem] mb-3">Skiltyje Nustatymai administratoriai gali valdyti visas sistemos esybes, tokias kaip grupės, naudotojai, vaidmenys, įvykiai, įrenginiai, medijos šaltiniai ir piktogramos.</p>
+<h3 class="subsection">Sukurti naują grupę</h3>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Eikite į <strong>Nustatymai → Grupės</strong>.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Spustelėkite <strong>Naujas įrašas</strong> mygtuką.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Užpildykite: <strong>Grupės pavadinimas</strong>, <strong>Spalva</strong>, <strong>Piktograma</strong>, ir, jei reikia, priskirkite kitas grupes.</div></div>
+<div class="step-item"><div class="step-num">4</div><div class="step-text">Spustelėkite <strong>Išsaugoti</strong> kad sukurtumėte grupę.</div></div>
+</div>
+<h3 class="subsection">Sukurti naują naudotoją</h3>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Eikite į <strong>Nustatymai → Naudotojai</strong>.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Spustelėkite <strong>Naujas įrašas</strong> mygtuką.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Užpildykite: naudotojo vardas, slaptažodis, vardas, el. paštas, telefono numeris, grupė ir vaidmuo.</div></div>
+<div class="step-item"><div class="step-num">4</div><div class="step-text">Spustelėkite <strong>Išsaugoti</strong> kad sukurtumėte naują naudotoją.</div></div>
+</div>
+<div class="alert-box info">
+<svg class="alert-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" fill-rule="evenodd"></path></svg>
+<div><strong>Patarimas:</strong> Esamus naudotojus ar grupes galite redaguoti spustelėję šalia jų įrašo esančią redagavimo piktogramą.</div>
+</div>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/GroupsAndUsers.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/GroupsAndUsers.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ==================== DEVICES ==================== -->
+<div class="doc-section" id="devices">
+<div class="section-card">
+<div class="section-title">
+<div class="title-icon bg-cyan-100 text-cyan-600">
+<svg fill="currentColor" height="20" viewbox="0 0 20 20" width="20"><path d="M13 4.5a2.5 2.5 0 11.702 1.737L6.97 9.604a2.5 2.5 0 110 .792l6.733 3.367a2.5 2.5 0 11-.67 1.341L6.3 11.737a2.5 2.5 0 010-3.474l6.733-3.367A2.494 2.494 0 0113 4.5z"></path></svg>
+</div>
+                        Įrenginių valdymas
+                    </div>
+<div class="section-divider"></div>
+<div class="content-grid">
+<div>
+<p class="text-slate-600 text-[.9375rem] mb-3">Skiltis Įrenginiai leidžia administratoriams kurti ir valdyti aparatinės įrangos įrenginius, susietus su naudotojais ar grupėmis įvykio viduje.</p>
+<h3 class="subsection">Kaip atidaryti įrenginius</h3>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Kairiajame skydelyje spustelėkite <strong>Nustatymai</strong>.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Pasirinkite <strong>Įrenginiai</strong> iš submeniu.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Bus parodyta įrenginių valdymo lentelė su visais esamais įrenginiais.</div></div>
+</div>
+<h3 class="subsection">Naujo įrenginio kūrimas</h3>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Įrenginių puslapio viršuje dešinėje spustelėkite mygtuką „Naujas įrašas“.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Užpildykite: <strong>Įrenginio pavadinimas</strong>, <strong>Įrenginio ID</strong>, <strong>Piktograma</strong>, <strong>Medijos įrenginys</strong>, ir <strong>Priskirti kam</strong>.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Spustelėkite <strong>Išsaugoti</strong>.</div></div>
+</div>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/DevicesCrud.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/DevicesCrud.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ==================== MEDIA SOURCES ==================== -->
+<div class="doc-section" id="media-sources">
+<div class="section-card">
+<div class="section-title">
+<div class="title-icon bg-pink-100 text-pink-600">
+<svg fill="currentColor" height="20" viewbox="0 0 20 20" width="20"><path d="M3.25 4A2.25 2.25 0 001 6.25v7.5A2.25 2.25 0 003.25 16h7.5A2.25 2.25 0 0013 13.75v-7.5A2.25 2.25 0 0010.75 4h-7.5zM19 4.75a.75.75 0 00-1.28-.53l-3 3a.75.75 0 00-.22.53v4.5c0 .199.079.39.22.53l3 3a.75.75 0 001.28-.53V4.75z"></path></svg>
+</div>
+                        Medijos šaltiniai
+                    </div>
+<div class="section-divider"></div>
+<div class="content-grid">
+<div>
+<p class="text-slate-600 text-[.9375rem] mb-3">Modulis Medijos šaltiniai leidžia administratoriams registruoti ir valdyti išorinius vaizdo ar medijos srautus (pvz., CCTV kameras, ONVIF kameras, push/pull srautus).</p>
+<h3 class="subsection">Naujo medijos šaltinio kūrimas</h3>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Eikite į <strong>Nustatymai → Medijos šaltiniai</strong>.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Viršuje dešinėje spustelėkite „Naujas įrašas“.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Užpildykite: <strong>Pavadinimas</strong>, <strong>Tipas</strong> (Push/Pull/ONVIF), ir <strong>URL</strong>.</div></div>
+<div class="step-item"><div class="step-num">4</div><div class="step-text">Spustelėkite <strong>Išsaugoti</strong> kad užbaigtumėte medijos šaltinio kūrimą.</div></div>
+</div>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/MediaSourcesCrud.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/MediaSourcesCrud.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ==================== ZONES & SECTORS ==================== -->
+<div class="doc-section" id="zones-sectors">
+<div class="section-card">
+<div class="section-title">
+<div class="title-icon bg-emerald-100 text-emerald-600">
+<svg fill="currentColor" height="20" viewbox="0 0 20 20" width="20"><path clip-rule="evenodd" d="M8.157 2.175a1.5 1.5 0 00-1.147 0l-4.084 1.69A1.5 1.5 0 002 5.251v10.877a.75.75 0 001.074.676l3.502-1.69 4.007 1.671a1.5 1.5 0 001.147 0l3.344-1.39a.75.75 0 000-1.378l-3.344-1.39a1.5 1.5 0 00-1.147 0L7.08 14.218l-3.58 1.73V5.25l4.084-1.69 4.007 1.671a1.5 1.5 0 001.147 0l3.344-1.39a.75.75 0 000-1.378l-3.344-1.39a1.5 1.5 0 00-1.147 0L8.157 2.175z" fill-rule="evenodd"></path></svg>
+</div>
+                        Piešti zonas ir sektorius
+                    </div>
+<div class="section-divider"></div>
+<div class="content-grid">
+<div>
+<h3 class="subsection">Sukurti struktūrą žemėlapyje</h3>
+<p class="text-slate-600 text-[.9375rem] mb-3">Struktūra reiškia fiksuotą vietą ar objektą įvykio žemėlapyje — pvz., vadavietę, stebėjimo punktą ar zoną su įrenginiais, tokiais kaip dronai ar švyturiai.</p>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Eikite į įvykio kūrimo langą arba atidarykite esamą įvykį redagavimo režimu.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Žemėlapio įrankių juostoje spustelėkite GPS piktogramą, kad įjungtumėte struktūros išdėstymo režimą.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Spustelėkite norimą vietą žemėlapyje, kurioje norite padėti struktūrą.</div></div>
+<div class="step-item"><div class="step-num">4</div><div class="step-text">Sukonfigūruokite: <strong>Piktogramos pasirinkimas</strong>, <strong>Struktūros pavadinimas</strong>, ir, jei reikia, pridėkite įrenginius.</div></div>
+<div class="step-item"><div class="step-num">5</div><div class="step-text">Spustelėkite bet kur žemėlapyje, kad išsaugotumėte struktūrą.</div></div>
+</div>
+<h3 class="subsection">Piešti sektorių žemėlapyje</h3>
+<p class="text-slate-600 text-[.9375rem] mb-3">Sektorius reiškia apibrėžtą zoną žemėlapyje — pvz., patruliavimo zoną, ribojamą teritoriją ar operacinį regioną.</p>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Žemėlapio įrankių juostoje spustelėkite <strong>Sektoriaus piktogramą</strong> kad įjungtumėte sektoriaus braižymo režimą.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Pradėkite braižyti zoną spustelėdami kiekvieną kampinį tašką.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Spustelėkite paskutinį tašką, kad uždarytumėte zoną.</div></div>
+<div class="step-item"><div class="step-num">4</div><div class="step-text">Sukonfigūruokite: <strong>Spalva</strong>, <strong>Pavadinimas</strong>, <strong>Lygumas</strong>, ir <strong>Užpildo nepermatomumas</strong>.</div></div>
+<div class="step-item"><div class="step-num">5</div><div class="step-text">Spustelėkite bet kur žemėlapyje, kad išsaugotumėte sektorių.</div></div>
+</div>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/sectors_lines_points.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/sectors_lines_points.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+<hr class="section-sep"/>
+<div class="content-grid">
+<div>
+<h3 class="subsection">Kurti multimedijos šaltinius</h3>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/MultimediaSources.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/MultimediaSources.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ==================== TASKS ==================== -->
+<div class="doc-section" id="tasks">
+<div class="section-card">
+<div class="section-title">
+<div class="title-icon bg-amber-100 text-amber-600">
+<svg fill="currentColor" height="20" viewbox="0 0 20 20" width="20"><path clip-rule="evenodd" d="M2.5 3A1.5 1.5 0 001 4.5v4A1.5 1.5 0 002.5 10h6A1.5 1.5 0 0010 8.5v-4A1.5 1.5 0 008.5 3h-6zm11 2A1.5 1.5 0 0012 6.5v7a1.5 1.5 0 001.5 1.5h4a1.5 1.5 0 001.5-1.5v-7A1.5 1.5 0 0017.5 5h-4zm-10 7A1.5 1.5 0 002 13.5v2A1.5 1.5 0 003.5 17h5A1.5 1.5 0 0010 15.5v-2A1.5 1.5 0 008.5 12h-5z" fill-rule="evenodd"></path></svg>
+</div>
+                        Kurti užduotis
+                    </div>
+<div class="section-divider"></div>
+<p class="text-slate-600 text-[.9375rem] mb-4">Užduotys yra pavedimai, kuriuos naudotojai turi atlikti įvykio metu. „Mapli“ palaiko kelis užduočių tipus skirtingiems operaciniams poreikiams.</p>
+<div class="feature-grid">
+<div class="feature-card">
+<h4>Vietos užduotis</h4>
+<p>Reikalauja, kad naudotojai pasiektų konkretų tašką žemėlapyje nustatytu spinduliu.</p>
+</div>
+<div class="feature-card">
+<h4>Zonos užduotis</h4>
+<p>Reikalauja, kad naudotojai stebėtų arba saugotų apibrėžtą zoną / sektorių.</p>
+</div>
+<div class="feature-card">
+<h4>Maršruto užduotis</h4>
+<p>Reikalauja, kad naudotojai judėtų maršrutu per iš anksto nustatytus kontrolės punktus.</p>
+</div>
+<div class="feature-card">
+<h4>Veiksmo užduotis</h4>
+<p>Su vieta nesusieta užduotis bendriems veiksmams ar pareigoms.</p>
+</div>
+<div class="feature-card">
+<h4>Švyturio užduotis</h4>
+<p>Susieta su švyturių įrenginiais vietos nustatymui patalpose.</p>
+</div>
+</div>
+<hr class="section-sep"/>
+<!-- Location Task -->
+<div class="content-grid">
+<div>
+<h3 class="subsection">Sukurti vietos užduotį</h3>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Atidarykite savo įvykį ir spustelėkite <strong>Užduotys</strong> kairiajame skydelyje.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Spustelėkite <strong>Kurti naują užduotį</strong> ir pasirinkite <strong>Vietos užduotis</strong>.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Spustelėkite žemėlapyje, kad pažymėtumėte užduoties vietą.</div></div>
+<div class="step-item"><div class="step-num">4</div><div class="step-text">Užpildykite: užduoties pavadinimas, aprašymas, pradžios / pabaigos data, vietos spindulys (min. 10 m) ir priskirti naudotojai.</div></div>
+<div class="step-item"><div class="step-num">5</div><div class="step-text">Spustelėkite <strong>Išsaugoti</strong> kad sukurtumėte užduotį.</div></div>
+</div>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/LocationTask.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/LocationTask.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+<hr class="section-sep"/>
+<!-- Area Task -->
+<div class="content-grid">
+<div>
+<h3 class="subsection">Sukurti zonos užduotį</h3>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Spustelėkite <strong>Kurti naują užduotį</strong> ir pasirinkite <strong>Zonos užduotis</strong>.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Spustelėkite <strong>Piešti</strong> kad sukurtumėte naują zoną arba <strong>Pasirinkite</strong> kad pasirinktumėte esamą zoną.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Užpildykite: užduoties pavadinimas, aprašymas, pradžios / pabaigos data, naudotojų grupė ir vienetų skaičius.</div></div>
+<div class="step-item"><div class="step-num">4</div><div class="step-text">Spustelėkite <strong>Registruoti užduotį</strong> kad užbaigtumėte.</div></div>
+</div>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/AreaTask.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/AreaTask.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+<hr class="section-sep"/>
+<!-- Path Task -->
+<div class="content-grid">
+<div>
+<h3 class="subsection">Sukurti maršruto užduotį</h3>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Spustelėkite <strong>Kurti naują užduotį</strong> ir pasirinkite <strong>Maršruto užduotis</strong>.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Nubraižykite maršrutą žemėlapyje — kiekvienas spustelėjimas nustato kontrolės punktą.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Baigdami dukart spustelėkite arba dar kartą spustelėkite paskutinį kontrolės punktą.</div></div>
+<div class="step-item"><div class="step-num">4</div><div class="step-text">Užpildykite: užduoties pavadinimas, aprašymas, kontrolės punkto spindulys (min. 5 m) ir priskirkite grupes / naudotojus.</div></div>
+<div class="step-item"><div class="step-num">5</div><div class="step-text">Spustelėkite <strong>Registruoti užduotį</strong>.</div></div>
+</div>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/PathTask.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/PathTask.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+<hr class="section-sep"/>
+<!-- Action Task -->
+<div class="content-grid">
+<div>
+<h3 class="subsection">Sukurti veiksmo užduotį</h3>
+<p class="text-slate-600 text-[.9375rem] mb-3">Veiksmo užduotys nėra susietos su konkrečia vieta žemėlapyje.</p>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Spustelėkite <strong>Kurti naują užduotį</strong> ir pasirinkite <strong>Veiksmo užduotis</strong>.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Užpildykite: užduoties pavadinimas, aprašymas, pradžios / pabaigos data ir priskirkite grupes / naudotojus.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Spustelėkite <strong>Registruoti užduotį</strong>.</div></div>
+</div>
+<div class="alert-box warning">
+<svg class="alert-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" fill-rule="evenodd"></path></svg>
+<div><strong>Pastaba:</strong> Jei užduotis iki pabaigos laiko nebus pažymėta kaip atlikta, ji automatiškai bus pažymėta kaip „Nepavyko“.</div>
+</div>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/ActionTask.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/ActionTask.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+<hr class="section-sep"/>
+<!-- Beacon Task -->
+<div class="content-grid">
+<div>
+<h3 class="subsection">Sukurti švyturio užduotį</h3>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Spustelėkite <strong>Kurti naują užduotį</strong> ir pasirinkite <strong>Švyturio užduotis</strong>.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Spustelėkite esamą švyturio struktūrą žemėlapyje.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Užpildykite: užduoties pavadinimas, aprašymas, pradžios / pabaigos data ir priskirkite grupes / naudotojus.</div></div>
+<div class="step-item"><div class="step-num">4</div><div class="step-text">Spustelėkite <strong>Registruoti užduotį</strong>.</div></div>
+</div>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/BeaconTask.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/BeaconTask.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ==================== EVENT PLAN ==================== -->
+<div class="doc-section" id="event-plan">
+<div class="section-card">
+<div class="section-title">
+<div class="title-icon bg-sky-100 text-sky-600">
+<svg fill="currentColor" height="20" viewbox="0 0 20 20" width="20"><path clip-rule="evenodd" d="M4.5 2A1.5 1.5 0 003 3.5v13A1.5 1.5 0 004.5 18h11a1.5 1.5 0 001.5-1.5V7.621a1.5 1.5 0 00-.44-1.06l-4.12-4.122A1.5 1.5 0 0011.378 2H4.5zm2.25 8.5a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-6.5zm0 3a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-6.5z" fill-rule="evenodd"></path></svg>
+</div>
+                        Generuoti įvykio plano dokumentą
+                    </div>
+<div class="section-divider"></div>
+<div class="content-grid">
+<div>
+<p class="text-slate-600 text-[.9375rem] mb-3">Įvykio plano dokumentas pateikia išsamią įvykio santrauką, įskaitant detales, dalyvius ir užduotis.</p>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Eikite į savo įvykio informacijos puslapį.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Viršuje dešinėje spustelėkite „burger“ meniu.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Pasirinkite <strong>Atsisiųsti Word dokumentą</strong> iš sąrašo.</div></div>
+</div>
+<p class="text-slate-600 text-[.9375rem] mt-4 mb-2"><strong>Sugeneruotame Word dokumente yra:</strong></p>
+<ul class="doc-list">
+<li>Įvykio pavadinimas, aprašymas, pradžios ir pabaigos datos</li>
+<li>Dalyvių sąrašas (grupės, naudotojai ir įrenginiai)</li>
+<li>Užduočių apžvalga su pavadinimais, aprašymais, laiku ir priskirtais naudotojais</li>
+</ul>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/EventPlan.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/EventPlan.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ==================== EVACUATION PLAN ==================== -->
+<div class="doc-section" id="evacuation-plan">
+<div class="section-card">
+<div class="section-title">
+<div class="title-icon bg-red-100 text-red-600">
+<svg fill="currentColor" height="20" viewbox="0 0 20 20" width="20"><path clip-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" fill-rule="evenodd"></path></svg>
+</div>
+                        Evakuacijos maršrutų planavimas
+                    </div>
+<div class="section-divider"></div>
+<div class="content-grid">
+<div>
+<p class="text-slate-600 text-[.9375rem] mb-3">Evakuacijos funkcija leidžia įvykio administratoriams planuoti, vizualizuoti ir valdyti evakuacijos maršrutus tiesiogiai įvykio žemėlapyje.</p>
+<h3 class="subsection">Kaip atidaryti evakuacijos skydelį</h3>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Eikite į savo įvykį.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Kairiajame skydelyje spustelėkite <strong>Evakuacija</strong> mygtuką.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Atsidarys evakuacijos skydelis su galimybėmis įjungti / išjungti režimą, pridėti maršrutus arba redaguoti esamus maršrutus.</div></div>
+</div>
+<h3 class="subsection">Evakuacijos režimo įjungimas arba išjungimas</h3>
+<ul class="doc-list">
+<li>Perjunkite <strong>Evakuacijos režimą</strong> jungikliu skydelyje.</li>
+<li>Kai aktyvuojama: visiems mobiliesiems naudotojams siunčiami pranešimai, žiniatinklio sąsajoje atsiranda juosta, o veiksmas įrašomas į žurnalą.</li>
+</ul>
+<h3 class="subsection">Automatinio evakuacijos maršruto pridėjimas</h3>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Evakuacijos skydelyje spustelėkite <strong>Automatinis maršruto braižymas</strong> parinktį.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Pasirinkite evakuacijos būdą:
+        <ul class="mt-2 ml-1 space-y-1">
+<li><strong>Pėsčiomis</strong> – sukuria pėstiesiems pritaikytą maršrutą;</li>
+<li><strong>Dviračiu</strong> – sukuria dviratininkams pritaikytą maršrutą;</li>
+<li><strong>Automobiliu</strong> – sukuria maršrutą keliais.</li>
+</ul>
+</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Žemėlapyje sukurkite evakuacijos maršrutą spustelėdami:
+        <ul class="mt-2 ml-1 space-y-1">
+<li><strong>Pirmas spustelėjimas</strong> – nustato maršruto pradžios tašką;</li>
+<li><strong>Antras spustelėjimas</strong> – nustato maršruto pabaigos tašką (link išėjimo arba saugios zonos).</li>
+</ul>
+</div></div>
+<div class="step-item"><div class="step-num">4</div><div class="step-text">Maršrutas bus rodomas skydelyje su maršruto ilgiu ir numatoma kelionės trukme.</div></div>
+<div class="step-item"><div class="step-num">5</div><div class="step-text">Jei reikia, redaguokite maršrutą — perkelkite pradžios ar pabaigos žymeklį žemėlapyje arba pakeiskite maršruto ir taškų pavadinimus.</div></div>
+<div class="step-item"><div class="step-num">6</div><div class="step-text">Spustelėkite <strong>Išsaugoti</strong> kad išsaugotumėte maršrutą.</div></div>
+<div class="step-item"><div class="step-num">7</div><div class="step-text">Kartokite procesą, kad nubraižytumėte tiek maršrutų, kiek reikia.</div></div>
+</div>
+<h3 class="subsection">Rankinio evakuacijos maršruto pridėjimas</h3>
+<p class="text-slate-600 text-[.9375rem]">Užuot leidę sistemai automatiškai sugeneruoti maršrutą, galite sukonfigūruoti evakuacijos maršrutą rankiniu būdu. Tai naudinga, kai geriausias kelias neseka esamais keliais ar pėsčiųjų takais.</p>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Evakuacijos skydelyje spustelėkite <strong>Rankinis maršruto braižymas</strong> parinktį.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Žemėlapyje sukurkite evakuacijos maršrutą spustelėdami:
+        <ul class="mt-2 ml-1 space-y-1">
+<li><strong>Pirmas spustelėjimas</strong> – nustato maršruto pradžios tašką;</li>
+<li><strong>Spustelėjimai po pirmojo</strong> – nustato maršruto eigą;</li>
+<li><strong>Paskutinis spustelėjimas</strong> – nustato maršruto pabaigos tašką.</li>
+</ul>
+</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Jei reikia, redaguokite maršrutą — perkelkite pradžios ar pabaigos žymeklį žemėlapyje arba pakeiskite maršruto ir taškų pavadinimus.</div></div>
+<div class="step-item"><div class="step-num">4</div><div class="step-text">Spustelėkite <strong>Išsaugoti</strong> kad išsaugotumėte maršrutą.</div></div>
+<div class="step-item"><div class="step-num">5</div><div class="step-text">Kartokite procesą, kad nubraižytumėte tiek maršrutų, kiek reikia.</div></div>
+</div>
+<div class="alert-box success">
+<svg class="alert-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" fill-rule="evenodd"></path></svg>
+<div><strong>Rezultatas:</strong> Sukūrus ir išsaugojus evakuacijos maršrutus, jie bus rodomi įvykio žemėlapyje, kad avarinių situacijų metu būtų lengvai pasiekiami. Evakuacijos režimą galima aktyvuoti bet kada, kad būtų įspėti naudotojai ir pradėta procedūra.</div>
+</div>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/Evacuation.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/Evacuation.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ==================== INCIDENTS ==================== -->
+<div class="doc-section" id="incidents">
+<div class="section-card">
+<div class="section-title">
+<div class="title-icon bg-orange-100 text-orange-600">
+<svg fill="currentColor" height="20" viewbox="0 0 20 20" width="20"><path clip-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" fill-rule="evenodd"></path></svg>
+</div>
+                        Incidentų valdymas
+                    </div>
+<div class="section-divider"></div>
+<div class="content-grid">
+<div>
+<p class="text-slate-600 text-[.9375rem] mb-3">Incidentų funkcija leidžia kurti, peržiūrėti ir valdyti incidentus tiesiogiai įvykio žemėlapyje.</p>
+<h3 class="subsection">Naujo incidento kūrimas</h3>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Atidarykite savo įvykį ir spustelėkite <strong>Incidentai</strong> kairiajame skydelyje.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Spustelėkite <strong>Kurti naują incidentą</strong>.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Spustelėkite žemėlapyje vietą, kurioje įvyko incidentas.</div></div>
+<div class="step-item"><div class="step-num">4</div><div class="step-text">Užpildykite: incidento lygis (kritinis / didelis / mažas), aprašymas, priskirtos grupės.</div></div>
+<div class="step-item"><div class="step-num">5</div><div class="step-text">Jei reikia, pažymėkite „Sukurti kaip užduotį“, kad būtų sugeneruota susijusi užduotis.</div></div>
+<div class="step-item"><div class="step-num">6</div><div class="step-text">Spustelėkite <strong>Registruoti naują incidentą</strong>.</div></div>
+</div>
+<h3 class="subsection">Esamų incidentų valdymas</h3>
+<ul class="doc-list">
+<li>Spustelėkite bet kurį incidentą sąraše arba žemėlapyje, kad redaguotumėte detales.</li>
+<li>Būsenos: <strong>Neišspręsta</strong> (aktyvus) arba <strong>Išspręsta</strong> (sutvarkyta).</li>
+<li>Parinktys: ištrinti, rasti žemėlapyje, pažymėti kaip išspręstą.</li>
+</ul>
+<h3 class="subsection">Incidentų pranešimai ir medijos bendrinimas</h3>
+<p class="text-slate-600 text-[.9375rem] mb-2">Kiekviename incidente yra komentarų skiltis tiesioginiam bendravimui:</p>
+<ul class="doc-list">
+<li>Siųsti tekstines žinutes</li>
+<li>Pridėti ir siųsti nuotraukas</li>
+<li>Pridėti ir siųsti vaizdo failus</li>
+</ul>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/Incidents.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/Incidents.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ==================== ACTIVITY LOG ==================== -->
+<div class="doc-section" id="activity-log">
+<div class="section-card">
+<div class="section-title">
+<div class="title-icon bg-yellow-100 text-yellow-600">
+<svg fill="currentColor" height="20" viewbox="0 0 20 20" width="20"><path clip-rule="evenodd" d="M10 2a6 6 0 00-6 6c0 1.887-.454 3.665-1.257 5.234a.75.75 0 00.515 1.076 32.91 32.91 0 003.256.508 3.5 3.5 0 006.972 0 32.903 32.903 0 003.256-.508.75.75 0 00.515-1.076A11.448 11.448 0 0116 8a6 6 0 00-6-6zm0 14.5a2 2 0 01-1.95-1.557 33.54 33.54 0 003.9 0A2 2 0 0110 16.5z" fill-rule="evenodd"></path></svg>
+</div>
+                        Veiksmų žurnalas ir pranešimai
+                    </div>
+<div class="section-divider"></div>
+<p class="text-slate-600 text-[.9375rem] mb-3">Veiksmų žurnalas informuoja naudotojus apie visus svarbius įvykius. Pranešimai rodomi kaip varpelio piktograma su raudonu skaitikliu.</p>
+<p class="text-slate-600 text-[.9375rem] mb-2"><strong>Pranešimų aktyvikliai:</strong></p>
+<ul class="doc-list">
+<li>Sukurtas naujas kvietimo kodas</li>
+<li>Naudotojas pridėtas prie pokalbio kanalo</li>
+<li>Pakeistas kanalo pavadinimas</li>
+<li>Užduočių priminimai</li>
+<li>Importuotas laiko juostos maršrutas</li>
+<li>Prašymas pradėti vaizdo transliaciją</li>
+<li>Sukurtas incidentas</li>
+<li>Žinutė išsiųsta bet kuriame kanale</li>
+<li>Vaizdo transliacija pradėta / baigta</li>
+<li>Naudotojas neįvykdė užduoties</li>
+<li>Naudotojo prisiregistravimas užbaigtas</li>
+<li>Užduotis pradėta su nepakankamu naudotojų skaičiumi</li>
+</ul>
+</div>
+</div>
+<!-- ==================== REAL-TIME LOCATIONS ==================== -->
+<div class="doc-section" id="realtime-locations">
+<div class="section-card">
+<div class="section-title">
+<div class="title-icon bg-teal-100 text-teal-600">
+<svg fill="currentColor" height="20" viewbox="0 0 20 20" width="20"><path clip-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.145c.186-.1.429-.241.71-.424.56-.366 1.301-.904 2.044-1.617C14.77 15.372 16.5 13 16.5 10a6.5 6.5 0 10-13 0c0 3 1.73 5.372 3.13 6.736.744.713 1.484 1.251 2.045 1.617a13.6 13.6 0 00.99.57l.019.007.006.003zM10 11.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" fill-rule="evenodd"></path></svg>
+</div>
+                        Stebėti vietas realiuoju laiku
+                    </div>
+<div class="section-divider"></div>
+<p class="text-slate-600 text-[.9375rem] mb-3">Vietos stebėjimo realiuoju laiku funkcija leidžia administratoriams nuolat sekti visų aktyvių mobiliųjų naudotojų judėjimą.</p>
+<div class="alert-box info">
+<svg class="alert-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" fill-rule="evenodd"></path></svg>
+<div><strong>Kaip tai veikia:</strong> Kai naudotojas atidaro mobiliąją programėlę (net fone), jo vieta automatiškai atnaujinama žiniatinklio žemėlapyje. Vieta atnaujinama kas sekundę (arba dažniau), kad judėjimas būtų sekamas sklandžiai ir tiksliai.</div>
+</div>
+<p class="text-slate-600 text-[.9375rem] mt-4 mb-2">Ši funkcija padeda įvykio administratoriams:</p>
+<ul class="doc-list">
+<li>Išlaikyti pilną situacijos suvokimą</li>
+<li>Stebėti patruliavimo veiklą</li>
+<li>Greitai reaguoti į incidentus pagal tikslias, realiuoju laiku gaunamas naudotojų vietas</li>
+</ul>
+</div>
+</div>
+<!-- ==================== TASKS REVIEW ==================== -->
+<div class="doc-section" id="tasks-review">
+<div class="section-card">
+<div class="section-title">
+<div class="title-icon bg-purple-100 text-purple-600">
+<svg fill="currentColor" height="20" viewbox="0 0 20 20" width="20"><path clip-rule="evenodd" d="M15.988 3.012A2.25 2.25 0 0118 5.25v6.5A2.25 2.25 0 0115.75 14H13.5V7A2.5 2.5 0 0011 4.5H8.128a2.252 2.252 0 011.884-1.488A2.25 2.25 0 0112.25 1h1.5a2.25 2.25 0 012.238 2.012zM11.5 3.25a.75.75 0 01.75-.75h1.5a.75.75 0 01.75.75v.25h-3v-.25z" fill-rule="evenodd"></path><path clip-rule="evenodd" d="M2 7a1 1 0 011-1h8a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V7zm2 3.25a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5a.75.75 0 01-.75-.75zm0 3.5a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5a.75.75 0 01-.75-.75z" fill-rule="evenodd"></path></svg>
+</div>
+                        Užduočių peržiūra
+                    </div>
+<div class="section-divider"></div>
+<p class="text-slate-600 text-[.9375rem] mb-3">Užduočių peržiūros funkcija leidžia įvykio administratoriams peržiūrėti, filtruoti ir analizuoti visas konkrečiam įvykiui sukurtas užduotis.</p>
+<h3 class="subsection">Kaip atidaryti užduočių sąrašą</h3>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Eikite į savo įvykį.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Kairiajame skydelyje spustelėkite <strong>Užduotys</strong>.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Peržiūrėkite visą šiam įvykiui sukurtų užduočių sąrašą.</div></div>
+</div>
+<h3 class="subsection">Užduočių būsenų kortelės</h3>
+<div class="feature-grid">
+<div class="feature-card">
+<h4>Laukiama</h4>
+<p>Užduotys, kurios dar nėra visiškai atliktos.</p>
+</div>
+<div class="feature-card">
+<h4>Atlikta</h4>
+<p>Užduotys, kurios buvo sėkmingai įvykdytos.</p>
+</div>
+<div class="feature-card">
+<h4>Nepavyko</h4>
+<p>Užduotys, kurios nebuvo atliktos pagal nustatytas sąlygas.</p>
+</div>
+</div>
+<h3 class="subsection">Užduočių paieška</h3>
+<p class="text-slate-600 text-[.9375rem]">Naudokite paieškos juostą užduočių puslapio viršuje, kad ieškotumėte pagal užduoties pavadinimą, tipą, ID, grupę, naudotoją ar bet kurį susijusį raktažodį.</p>
+<h3 class="subsection">Užduočių ataskaitos lentelė</h3>
+<p class="text-slate-600 text-[.9375rem] mb-3">Spustelėkite <strong>Užduočių ataskaita</strong> mygtuką, kad atidarytumėte išsamią eksportavimui paruoštą lentelę, kurioje rodoma:</p>
+<table class="doc-table">
+<tbody>
+<tr><td><strong>ID</strong></td><td>Unikalus užduoties identifikatorius</td></tr>
+<tr><td><strong>Tipas</strong></td><td>Vieta, zona, maršrutas, veiksmas, švyturys ir kt.</td></tr>
+<tr><td><strong>Pavadinimas</strong></td><td>Užduoties pavadinimas</td></tr>
+<tr><td><strong>Aprašymas</strong></td><td>Užduoties detalės arba paskirtis</td></tr>
+<tr><td><strong>Būsena</strong></td><td>Laukiama / Atlikta / Nepavyko</td></tr>
+<tr><td><strong>Prasideda / baigiasi</strong></td><td>Užduoties pradžios ir pabaigos laikai</td></tr>
+<tr><td><strong>Grupė</strong></td><td>Užduočiai priskirta grupė</td></tr>
+<tr><td><strong>Naudotojai</strong></td><td>Visi dalyvaujantys naudotojai</td></tr>
+<tr><td><strong>Užregistravo</strong></td><td>Administratorius, sukūręs užduotį</td></tr>
+<tr><td><strong>Komentarai</strong></td><td>Pridėtų komentarų ar medijos skaičius</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- ==================== VIDEO STREAMS ==================== -->
+<div class="doc-section" id="video-streams">
+<div class="section-card">
+<div class="section-title">
+<div class="title-icon bg-pink-100 text-pink-600">
+<svg fill="currentColor" height="20" viewbox="0 0 20 20" width="20"><path d="M3.25 4A2.25 2.25 0 001 6.25v7.5A2.25 2.25 0 003.25 16h7.5A2.25 2.25 0 0013 13.75v-7.5A2.25 2.25 0 0010.75 4h-7.5zM19 4.75a.75.75 0 00-1.28-.53l-3 3a.75.75 0 00-.22.53v4.5c0 .199.079.39.22.53l3 3a.75.75 0 001.28-.53V4.75z"></path></svg>
+</div>
+                        Vaizdo srautai
+                    </div>
+<div class="section-divider"></div>
+<div class="content-grid">
+<div>
+<p class="text-slate-600 text-[.9375rem] mb-3">Transliavimas mobiliojo įrenginio naudotojams yra prieinamas kaip bendravimo su žiniatinklio programos operatoriais būdas – tiesioginis vaizdo perdavimas iš naudotojo kameros į operatoriaus kompiuterio ekraną. Žiniatinklio operatorius turi pateikti užklausą, kad konkretus naudotojas pradėtų transliuoti, tačiau naudotojas taip pat gali pradėti transliaciją savarankiškai.</p>
+<h3 class="subsection">Transliacijos užklausimas</h3>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Atidarykite <strong>Vienetai</strong> meniu.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Prašykite transliacijos tiesiai iš naudotojų sąrašo spustelėdami transliacijos piktogramą šalia konkretaus naudotojo.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Arba pasirinkite naudotoją sąraše ir paprašykite transliacijos spustelėdami transliacijos piktogramą naudotojo informacijos meniu.</div></div>
+</div>
+<div class="alert-box success">
+<svg class="alert-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" fill-rule="evenodd"></path></svg>
+<div><strong>Rezultatas:</strong> Paprašius transliacijos iš žiniatinklio programos, mobiliosios programėlės naudotojas gauna pranešimą apie užklausą.</div>
+</div>
+<h3 class="subsection">Transliacijų peržiūra valdymo kambaryje</h3>
+<div class="steps-container">
+<div class="step-item">
+<div class="step-num">1</div>
+<div class="step-text">Atidarykite <strong>Valdymo kambarys</strong> naudodami perjungimo mygtuką, esantį sąsajos viršuje dešinėje.</div>
+</div>
+<div class="step-item">
+<div class="step-num">2</div>
+<div class="step-text">Peržiūrėkite gaunamas transliacijas <strong>vaizdo sienos rodinyje</strong>, leidžiančiame vienu metu stebėti kelis vaizdo šaltinius.</div>
+</div>
+<div class="step-item">
+<div class="step-num">3</div>
+<div class="step-text">Stebėkite <strong>integruotus srautus</strong>, įskaitant mobiliųjų programėlių naudotojų, CCTV kamerų ir kitų vaizdą perduodančių įrenginių srautus.</div>
+</div>
+<div class="step-item">
+<div class="step-num">4</div>
+<div class="step-text">Valdykite ir prioritetizuokite srautus pagal poreikį, kad sutelktumėte dėmesį į svarbiausius srautus.</div>
+</div>
+</div>
+<div class="alert-box success">
+<svg class="alert-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" fill-rule="evenodd"></path>
+</svg>
+<div><strong>Rezultatas:</strong> Visi aktyvūs srautai rodomi centralizuotoje vaizdo sienoje, leidžiančioje efektyviai stebėti ir valdyti realiuoju laiku.</div>
+</div>
+<h3 class="subsection">Konkretaus naudotojo transliacijų peržiūra</h3>
+<div class="steps-container">
+<div class="step-item">
+<div class="step-num">1</div>
+<div class="step-text">Atidarykite <strong>Naudotojo informacijos meniu</strong> kad pasiektumėte konkretaus naudotojo tiesioginę transliaciją ir detales.</div>
+</div>
+<div class="step-item">
+<div class="step-num">2</div>
+<div class="step-text">Naudokite <strong>Vienetų meniu</strong> pasirinkdami naudotoją iš sąrašo.</div>
+</div>
+<div class="step-item">
+<div class="step-num">3</div>
+<div class="step-text">Arba naudokite <strong>Žemėlapio sąsają</strong> spustelėdami naudotojo piktogramą sistemos žemėlapyje.</div>
+</div>
+</div>
+<div class="alert-box success">
+<svg class="alert-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" fill-rule="evenodd"></path>
+</svg>
+<div><strong>Rezultatas:</strong> Pasirinkto naudotojo tiesioginė transliacija ir susijusi informacija rodomi tikslinei stebėsenai.</div>
+</div>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/RequestingStream.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/RequestingStream.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ==================== MESSAGING ==================== -->
+<div class="doc-section" id="messaging">
+<div class="section-card">
+<div class="section-title">
+<div class="title-icon bg-blue-100 text-blue-600">
+<svg fill="currentColor" height="20" viewbox="0 0 20 20" width="20"><path clip-rule="evenodd" d="M3.43 2.524A41.29 41.29 0 0110 2c2.236 0 4.43.18 6.57.524 1.437.231 2.43 1.49 2.43 2.902v5.148c0 1.413-.993 2.67-2.43 2.902a41.102 41.102 0 01-3.55.414c-.28.02-.521.18-.643.413l-1.712 3.293a.75.75 0 01-1.33 0l-1.713-3.293a.783.783 0 00-.642-.413 41.108 41.108 0 01-3.55-.414C1.993 13.245 1 11.986 1 10.574V5.426c0-1.413.993-2.67 2.43-2.902z" fill-rule="evenodd"></path></svg>
+</div>
+                        Pranešimai
+                    </div>
+<div class="section-divider"></div>
+<div class="content-grid">
+<div>
+<p class="text-slate-600 text-[.9375rem] mb-3">Pranešimų funkcija leidžia įvykio dalyviams bendrauti realiuoju laiku tekstinėmis, balso, nuotraukų ir vaizdo žinutėmis.</p>
+<h3 class="subsection">Kaip atidaryti pranešimų skydelį</h3>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Eikite į savo įvykį.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Kairiajame skydelyje spustelėkite <strong>Pranešimai</strong> mygtuką.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Peržiūrėkite esamus pokalbius ir kanalus pranešimų skydelyje.</div></div>
+</div>
+<h3 class="subsection">Kanalų tipai</h3>
+<ul class="doc-list">
+<li><strong>Bendras kanalas</strong> – Bendras kanalas, apimantis visus įvykio narius.</li>
+<li><strong>Grupių kanalai</strong> – Automatiškai sukuriami kiekvienai į įvykį pridėtai grupei.</li>
+<li><strong>Pasirinktiniai kanalai</strong> – Susikurkite savo kanalą privačiam arba mažos grupės bendravimui.</li>
+</ul>
+<h3 class="subsection">Naujo kanalo kūrimas</h3>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Spustelėkite <strong>Kurti kanalą</strong> mygtuką.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Pasirinkite dalyvius (asmenis arba grupes).</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Įveskite kanalo pavadinimą (neprivaloma privatiems pokalbiams).</div></div>
+<div class="step-item"><div class="step-num">4</div><div class="step-text">Spustelėkite <strong>Sukurti</strong> kad pradėtumėte pokalbį.</div></div>
+</div>
+<h3 class="subsection">Žinučių ir medijos siuntimas</h3>
+<ul class="doc-list">
+<li>Siųsti tekstines žinutes</li>
+<li>Įrašyti ir siųsti balso žinutes</li>
+<li>Pridėti ir siųsti nuotraukas</li>
+<li>Pridėti ir siųsti vaizdo įrašus</li>
+</ul>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/Messaging.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/Messaging.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ==================== TIMELINE ==================== -->
+<div class="doc-section" id="timeline">
+<div class="section-card">
+<div class="section-title">
+<div class="title-icon bg-indigo-100 text-indigo-600">
+<svg fill="currentColor" height="20" viewbox="0 0 20 20" width="20"><path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" fill-rule="evenodd"></path></svg>
+</div>
+                        Laiko juosta
+                    </div>
+<div class="section-divider"></div>
+<div class="content-grid">
+<div>
+<p class="text-slate-600 text-[.9375rem] mb-3">Laiko juostos funkcija leidžia įvykio administratoriams peržiūrėti naudotojų judėjimo istoriją žemėlapyje, vizualizuojant sekamus maršrutus per pasirinktą laikotarpį.</p>
+<h3 class="subsection">Kaip atidaryti laiko juostą</h3>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Eikite į savo įvykį.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Ekrano apačios centre spustelėkite <strong>Rodyti laiko juostą</strong>.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Atsidarys laiko juostos skydelis su laiko intervalo ir filtravimo parinktimis.</div></div>
+</div>
+<h3 class="subsection">Laiko juostos naudojimas</h3>
+<ul class="doc-list">
+<li>Sistema seka naudotojų vietas per mobiliąją programėlę ir braižo maršrutus žemėlapyje.</li>
+<li>Filtruokite pagal datą ir laiką, kad sutelktumėte dėmesį į konkrečius veiklos laikotarpius.</li>
+<li>Atitinkamas judėjimo maršrutas bus rodomas kaip nubraižytas kelias.</li>
+</ul>
+<h3 class="subsection">Laiko intervalo koregavimas</h3>
+<p class="text-slate-600 text-[.9375rem] mb-2">Naudokite oranžinę laiko juostą skydelio apačioje:</p>
+<ul class="doc-list">
+<li><strong>Tempkite kraštus</strong> – susiaurinkite arba išplėskite laiko intervalą.</li>
+<li><strong>Perkelkite juostą</strong> – perstumkite matomą laiko intervalą į kairę arba į dešinę.</li>
+<li>Žemėlapis automatiškai atsinaujina, kad parodytų judėjimą pasirinktame intervale.</li>
+</ul>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/Timeline.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/Timeline.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ==================== ORTHOPHOTOS ==================== -->
+<div class="doc-section" id="orthophotos">
+<div class="section-card">
+<div class="section-title">
+<div class="title-icon bg-indigo-100 text-indigo-600">
+<svg fill="currentColor" height="20" viewbox="0 0 20 20" width="20">
+<path d="M2 5a2 2 0 012-2h3l1-1h4l1 1h3a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5z"></path>
+</svg>
+</div>
+            Ortofotografijos
+        </div>
+<div class="section-divider"></div>
+<div class="content-grid">
+<div>
+<p class="text-slate-600 text-[.9375rem] mb-3">
+                    Ortofotografijų funkcija leidžia operatoriams prašyti oro vaizdų iš dronų arba peržiūrėti palydovines ortofotografijas. Tai leidžia stebėti realaus laiko įvykius, tokius kaip potvyniai, avarijos, žmonių susibūrimai ir kitos situacijos.
+                </p>
+<h3 class="subsection">Ortofotografijos iš drono užsakymas</h3>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Atidarykite <strong>Laiko juostos režimą</strong> žiniatinklio programoje.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Žemėlapyje raskite vietą, kurioje norite gauti ortofotografiją.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Atidarykite <strong>Sluoksnių meniu</strong> ir spustelėkite <strong>Ortofotografija</strong> skiltyje <strong>+Importuoti</strong> skyriuje.</div></div>
+<div class="step-item"><div class="step-num">4</div><div class="step-text">Nubraižykite stačiakampę (4 taškų) sritį ir paspauskite <strong>Enter</strong>.</div></div>
+<div class="step-item"><div class="step-num">5</div><div class="step-text">Jei drono operatorius pasiekiamas, sukonfigūruokite misijos parametrus, tokius kaip aukštis ir persidengimas.</div></div>
+<div class="step-item"><div class="step-num">6</div><div class="step-text">Pateikite galiojančius parametrus, kad pradėtumėte misiją. Ortofotografija bus prieinama po nufotografavimo ir apdorojimo.</div></div>
+</div>
+<h3 class="subsection">Drono misijos parametrai</h3>
+<ul class="doc-list">
+<li><strong>Aukštis (numatytasis: 30 m)</strong> – Didesnėms teritorijoms rekomenduojamas didesnis aukštis.</li>
+<li><strong>Persidengimas (numatytasis: 70 %)</strong> – Didesnis persidengimas užtikrina tikslesnius ir mažiau iškraipytus vaizdus.</li>
+<li>Jei parametrai neteisingi, sistema paprašys juos pataisyti.</li>
+</ul>
+<h3 class="subsection">Palydovinių ortofotografijų peržiūra</h3>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Atidarykite <strong>Laiko juostos režimą</strong>.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Atidarykite <strong>Sluoksnių meniu</strong>.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Raskite <strong>Ortofotografijas iš palydovo</strong> ir įjunkite norimą sluoksnį.</div></div>
+<div class="step-item"><div class="step-num">4</div><div class="step-text">Naudokite vietos piktogramą, kad pereitumėte prie aptiktų objektų žemėlapyje.</div></div>
+</div>
+<h3 class="subsection">Ortofotografijų ir aptikčių peržiūra</h3>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Atidarykite <strong>Sluoksnių meniu</strong>.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Išskleiskite <strong>Ortofotografijas iš dronų</strong> arba <strong>Ortofotografijas iš palydovo</strong>.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Įjunkite ortofotografiją pažymėdami langelį.</div></div>
+<div class="step-item"><div class="step-num">4</div><div class="step-text">Spustelėkite vietos piktogramą, kad pereitumėte prie ortofotografijos žemėlapyje.</div></div>
+</div>
+<ul class="doc-list">
+<li>Apdorojamos ortofotografijos rodomos kaip neaktyvūs įrašai.</li>
+<li>Aptikti objektai (pvz., namai, automobiliai, potvyniai, gaisrai) gali būti rodomi kaip atskiri sluoksniai.</li>
+<li>Aptikčių sluoksnius galima įjungti arba išjungti nepriklausomai.</li>
+</ul>
+<div class="alert-box success">
+<svg class="alert-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" fill-rule="evenodd"></path>
+</svg>
+<div><strong>Rezultatas:</strong> Ortofotografijos ir aptikti objektai rodomi žemėlapyje, todėl galima išsamiai suvokti situaciją ir ją analizuoti.</div>
+</div>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/DroneOrthophoto.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/DroneOrthophoto.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ==================== MOBILE APP ==================== -->
+<div class="doc-section" id="mobile">
+<div class="section-card">
+<div class="section-title">
+<div class="title-icon bg-green-100 text-green-600">
+<svg fill="currentColor" height="20" viewbox="0 0 20 20" width="20"><path d="M8 16.25a.75.75 0 01.75-.75h2.5a.75.75 0 010 1.5h-2.5a.75.75 0 01-.75-.75z"></path><path clip-rule="evenodd" d="M4 4a3 3 0 013-3h6a3 3 0 013 3v12a3 3 0 01-3 3H7a3 3 0 01-3-3V4zm3-1.5A1.5 1.5 0 005.5 4v12A1.5 1.5 0 007 17.5h6a1.5 1.5 0 001.5-1.5V4A1.5 1.5 0 0013 2.5H7z" fill-rule="evenodd"></path></svg>
+</div>
+                        Mobilioji programėlė – vykdyti įvykį (lauko personalas)
+                    </div>
+<div class="section-divider"></div>
+<p class="text-slate-600 text-[.9375rem] mb-4">Lauko personalas naudoja mobiliąją programėlę užduotims vykdyti, incidentams pranešti ir realiuoju laiku bendrauti su administratoriais.</p>
+<!-- Location Change Task -->
+<div class="content-grid">
+<div>
+<h3 class="subsection">Vietos pakeitimo užduotis</h3>
+<p class="text-slate-600 text-[.9375rem] mb-3">Reikalauja, kad naudotojas pasiektų konkretų tašką žemėlapyje nustatytu spinduliu.</p>
+<h4 class="sub-subsection">Kaip atidaryti užduotį</h4>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Atidarykite mobiliąją programėlę.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Bakstelėkite <strong>Užduotys</strong> apatinėje navigacijos juostoje.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Raskite ir bakstelėkite savo vietos pakeitimo užduotį skiltyje „Mano užduotys“.</div></div>
+</div>
+<h4 class="sub-subsection">Užduoties detalių ekranas</h4>
+<ul class="doc-list">
+<li><strong>Navigacijos mygtukas</strong> – Grąžina į pagrindinį žemėlapio ekraną.</li>
+<li><strong>Žemėlapio peržiūra</strong> – Rodo tikslią užduoties vietą.</li>
+<li><strong>Užduoties apžvalga</strong> – ID, tipas ir dalyvio informacija.</li>
+<li><strong>Užduoties laikas</strong> – Pradžios ir pabaigos laikai.</li>
+<li><strong>Naudotojo būsena</strong> – Laukiančių, atliktų arba nepavykusių sąrašai.</li>
+<li><strong>Komentarų mygtukas</strong> – Pridėti tekstą, nuotraukas arba vaizdo įrašus.</li>
+</ul>
+<h4 class="sub-subsection">Užduoties atlikimas</h4>
+<p class="text-slate-600 text-[.9375rem]">Nuvykite fiziškai į pažymėtą vietą. Kai pateksite į nustatytą spindulį, sistema automatiškai pažymės užduotį kaip atliktą.</p>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/MobileLocationTask.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/MobileLocationTask.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+<hr class="section-sep"/>
+<!-- Area Task -->
+<div class="content-grid">
+<div>
+<h3 class="subsection">Zonos (sektoriaus stebėjimo) užduotis</h3>
+<p class="text-slate-600 text-[.9375rem] mb-3">Reikalauja, kad naudotojai įeitų ir išliktų apibrėžtoje zonoje nurodytą laiką.</p>
+<h4 class="sub-subsection">Pagrindiniai veiksmai</h4>
+<ul class="doc-list">
+<li><strong>Prisiregistruoti</strong> – Bakstelėkite įeidami į zoną, kad pradėtumėte patruliavimą.</li>
+<li><strong>Išsiregistruoti</strong> – Bakstelėkite baigę.</li>
+</ul>
+<div class="alert-box warning">
+<svg class="alert-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" fill-rule="evenodd"></path></svg>
+<div><strong>Svarbu:</strong> Po išsiregistravimo nebegalėsite dar kartą prisiregistruoti tai pačiai užduočiai. Išsiregistravus per anksti, jūsų naudotojui užduotis bus pažymėta kaip nepavykusi.</div>
+</div>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/AreaTaskMobile.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/AreaTaskMobile.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+<hr class="section-sep"/>
+<!-- Path Task -->
+<div class="content-grid">
+<div>
+<h3 class="subsection">Maršruto užduotis</h3>
+<p class="text-slate-600 text-[.9375rem] mb-3">Reikalauja, kad naudotojai judėtų per iš anksto nustatytus kontrolės punktus žemėlapyje.</p>
+<h4 class="sub-subsection">Užduoties atlikimas</h4>
+<ul class="doc-list">
+<li>Suraskite kontrolės punktus žemėlapyje.</li>
+<li>Judėkite fiziškai link kiekvieno kontrolės punkto.</li>
+<li>Kai jūsų vieta patenka į kontrolės punkto spindulį, jis pažymimas kaip įveiktas.</li>
+<li>Kontrolės punktus galite aplankyti bet kuria tvarka.</li>
+<li>Kai visi kontrolės punktai įveikti, užduotis laikoma atlikta.</li>
+</ul>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/PathMobile.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/PathMobile.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+<hr class="section-sep"/>
+<!-- Action Task -->
+<div class="content-grid">
+<div>
+<h3 class="subsection">Veiksmo užduotis</h3>
+<p class="text-slate-600 text-[.9375rem] mb-3">Su vieta nesusieta užduotis, kurią galima atlikti rankiniu būdu.</p>
+<h4 class="sub-subsection">Užduoties atlikimas</h4>
+<p class="text-slate-600 text-[.9375rem]">Tiesiog bakstelėkite <strong>Atlikti užduotį</strong> mygtuką, kad pažymėtumėte ją kaip atliktą.</p>
+<div class="alert-box info">
+<svg class="alert-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" fill-rule="evenodd"></path></svg>
+<div><strong>Pastaba:</strong> Jei nustatytas pabaigos laikas ir užduotis iki jo neatliekama, ji automatiškai tampa nepavykusia. Kai užduotis nepavyksta, naudotojai nebegali jos užbaigti rankiniu būdu.</div>
+</div>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/ActionTaskMobile.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/ActionTaskMobile.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+<hr class="section-sep"/>
+<!-- Beacon Task -->
+<h3 class="subsection">Švyturio užduotis</h3>
+<p class="text-slate-600 text-[.9375rem] mb-3">Reikalauja, kad naudotojas pasiektų konkrečią vietą patalpose su švyturio įrenginiu.</p>
+<h4 class="sub-subsection">Užduoties atlikimas</h4>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Eikite į užduoties vietą, rodomą žemėlapyje.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Bakstelėkite <strong>Pradėti nuskaitymą</strong> būdami arti švyturio.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Sistema aptinka jūsų artumą ir pažymi užduotį kaip atliktą.</div></div>
+</div>
+<div class="alert-box info">
+<svg class="alert-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" fill-rule="evenodd"></path></svg>
+<div><strong>Patarimas:</strong> Įsitikinkite, kad jūsų mobiliajame įrenginyje įjungtas „Bluetooth“, kad būtų galima aptikti švyturius.</div>
+</div>
+</div>
+</div>
+<!-- ==================== MOBILE INCIDENTS ==================== -->
+<div class="doc-section" id="mobile-incidents">
+<div class="section-card">
+<div class="section-title">
+<div class="title-icon bg-red-100 text-red-600">
+<svg fill="currentColor" height="20" viewbox="0 0 20 20" width="20"><path clip-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" fill-rule="evenodd"></path></svg>
+</div>
+                        Mobilioji programėlė – incidentų kūrimas
+                    </div>
+<div class="section-divider"></div>
+<div class="content-grid">
+<div>
+<p class="text-slate-600 text-[.9375rem] mb-3">Mobilioji programėlė leidžia naudotojams greitai pranešti apie ekstremalias situacijas naudojant SOS mygtuką.</p>
+<h3 class="subsection">Kaip pasiekti SOS mygtuką</h3>
+<p class="text-slate-600 text-[.9375rem] mb-3">Pagrindiniame žemėlapio ekrane raskite <strong>SOS mygtuką</strong> apatiniame kairiajame kampe.</p>
+<h3 class="subsection">Incidento kūrimas per SOS</h3>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text"><strong>Paspauskite ir palaikykite</strong> SOS mygtuką 2 sekundes.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Sistema automatiškai sukuria <strong>Kritinį</strong> incidentą jūsų dabartinėje GPS vietoje.</div></div>
+</div>
+<div class="alert-box success">
+<svg class="alert-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" fill-rule="evenodd"></path></svg>
+<div><strong>Rezultatas:</strong> Kritinis incidentas su būsena „Neišspręsta“ iš karto sukuriamas jūsų vietoje — papildomos įvesties nereikia.</div>
+</div>
+<h3 class="subsection">Incidentų peržiūra ir valdymas</h3>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Bakstelėkite <strong>Incidentai</strong> apatinėje navigacijos juostoje.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Peržiūrėkite visų su įvykiu susijusių incidentų sąrašą.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Bakstelėkite bet kurį incidentą, kad peržiūrėtumėte detales ir pridėtumėte komentarų.</div></div>
+</div>
+<h3 class="subsection">Komentarai ir priedai</h3>
+<p class="text-slate-600 text-[.9375rem] mb-2">Bet kuriame incidente galite:</p>
+<ul class="doc-list">
+<li>Siųsti tekstines žinutes</li>
+<li>Pridėti nuotraukas ir vaizdo įrašus</li>
+<li>Įrašyti ir siųsti balso žinutes</li>
+</ul>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/IncidentMobile.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/IncidentMobile.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ==================== MOBILE Streaming ==================== -->
+<div class="doc-section" id="mobile-streaming">
+<div class="section-card">
+<div class="section-title">
+<div class="title-icon bg-red-100 text-red-600">
+<svg fill="currentColor" height="20" viewbox="0 0 20 20" width="20"><path clip-rule="evenodd" d="M3.25 4A2.25 2.25 0 001 6.25v7.5A2.25 2.25 0 003.25 16h7.5A2.25 2.25 0 0013 13.75v-7.5A2.25 2.25 0 0010.75 4h-7.5zM19 4.75a.75.75 0 00-1.28-.53l-3 3a.75.75 0 00-.22.53v4.5c0 .199.079.39.22.53l3 3a.75.75 0 001.28-.53V4.75z" fill-rule="evenodd"></path></svg>
+</div>
+                        Mobilioji programėlė – vaizdo transliavimas
+                    </div>
+<div class="section-divider"></div>
+<div class="content-grid">
+<div>
+<p class="text-slate-600 text-[.9375rem] mb-3">Mobilioji programėlė leidžia naudotojams transliuoti vaizdą iš įrenginio.</p>
+<h3 class="subsection">Transliacijos pradėjimas programėlėje</h3>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Bakstelėkite burbulą, kuriame rodoma <strong> kameros piktograma </strong>.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Pradėkite tiesioginę transliaciją pasirinkdami įrašymo mygtuką.</div></div>
+</div>
+<p class="text-slate-600 text-[.9375rem] mb-2">Visi žiniatinklio programos operatoriai, priskirti mobiliosios programėlės naudotojų grupei arba turintys jos matomumą, gali peržiūrėti transliaciją.</p>
+<div class="alert-box success">
+<svg class="alert-icon" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" fill-rule="evenodd"></path></svg>
+<div><strong>Rezultatas:</strong> Visi žiniatinklio programos operatoriai, priskirti mobiliosios programėlės naudotojų grupei arba turintys jos matomumą, gali peržiūrėti transliaciją.</div>
+</div>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/StreamFromApp.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/StreamFromApp.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ==================== MOBILE MESSAGING ==================== -->
+<div class="doc-section" id="mobile-messaging">
+<div class="section-card">
+<div class="section-title">
+<div class="title-icon bg-blue-100 text-blue-600">
+<svg fill="currentColor" height="20" viewbox="0 0 20 20" width="20"><path clip-rule="evenodd" d="M3.43 2.524A41.29 41.29 0 0110 2c2.236 0 4.43.18 6.57.524 1.437.231 2.43 1.49 2.43 2.902v5.148c0 1.413-.993 2.67-2.43 2.902a41.102 41.102 0 01-3.55.414c-.28.02-.521.18-.643.413l-1.712 3.293a.75.75 0 01-1.33 0l-1.713-3.293a.783.783 0 00-.642-.413 41.108 41.108 0 01-3.55-.414C1.993 13.245 1 11.986 1 10.574V5.426c0-1.413.993-2.67 2.43-2.902z" fill-rule="evenodd"></path></svg>
+</div>
+                        Mobilioji programėlė – pranešimai
+                    </div>
+<div class="section-divider"></div>
+<div class="content-grid">
+<div>
+<p class="text-slate-600 text-[.9375rem] mb-3">Bendraukite realiuoju laiku su įvykio dalyviais tekstinėmis, medijos ir balso žinutėmis.</p>
+<h3 class="subsection">Kaip atidaryti pranešimus</h3>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Atidarykite mobiliąją programėlę.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Bakstelėkite <strong>Žinutės</strong> apatinėje navigacijos juostoje.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Peržiūrėkite esamus kanalus ir pokalbius.</div></div>
+</div>
+<h3 class="subsection">Kanalų tipai</h3>
+<ul class="doc-list">
+<li><strong>Bendras kanalas</strong> – Visi įvykio naudotojai.</li>
+<li><strong>Grupės kanalas</strong> – Automatiškai sukuriamas kiekvienai grupei.</li>
+<li><strong>Pasirinktiniai kanalai / asmeninės žinutės</strong> – Sukurkite savo kanalą arba rašykite grupės nariams tiesiogiai.</li>
+</ul>
+<h3 class="subsection">Žinučių ir medijos siuntimas</h3>
+<ul class="doc-list">
+<li>Siųsti tekstines žinutes</li>
+<li>Pridėti ir siųsti nuotraukas</li>
+<li>Pridėti ir siųsti vaizdo įrašus</li>
+<li>Įrašyti ir siųsti balso žinutes</li>
+</ul>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/MessagesMobile.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/MessagesMobile.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ==================== MOBILE EVACUATION ==================== -->
+<div class="doc-section" id="mobile-evacuation">
+<div class="section-card">
+<div class="section-title">
+<div class="title-icon bg-rose-100 text-rose-600">
+<svg fill="currentColor" height="20" viewbox="0 0 20 20" width="20"><path d="M10 3.75a2 2 0 10-4 0 2 2 0 004 0zM17.25 11.5a.75.75 0 000-1.5h-4l-1.553-2.486A2.25 2.25 0 009.788 6.5H8.052a2.25 2.25 0 00-1.905 1.053L3.56 12.197a.75.75 0 001.267.806L6.782 9.8l1.693 4.233-2.647 4.94a.75.75 0 001.325.71L10 14.618l2.848 5.065a.75.75 0 001.324-.71l-2.647-4.94 1.218-3.044L14.25 11.5h3z"></path></svg>
+</div>
+                        Mobilioji programėlė – evakuacijos režimas
+                    </div>
+<div class="section-divider"></div>
+<div class="content-grid">
+<div>
+<p class="text-slate-600 text-[.9375rem] mb-3">Evakuacijos režimas saugiai nukreipia mobiliuosius naudotojus į išėjimo taškus ekstremalių situacijų metu.</p>
+<h3 class="subsection">Evakuacijos įspėjimų gavimas</h3>
+<ul class="doc-list">
+<li>Kai evakuacijos režimas aktyvuojamas žiniatinklio programoje, visi mobilieji naudotojai gauna pranešimą realiuoju laiku.</li>
+<li>Ekrane pasirodo raudonas evakuacijos mygtukas su bėgančio žmogaus piktograma.</li>
+</ul>
+<h3 class="subsection">Evakuacijos maršruto pasirinkimas</h3>
+<div class="steps-container">
+<div class="step-item"><div class="step-num">1</div><div class="step-text">Bakstelėkite <strong>Evakuacijos mygtuką</strong>.</div></div>
+<div class="step-item"><div class="step-num">2</div><div class="step-text">Pasirinkite režimą: <strong>Pėsčiomis</strong>, <strong>Dviračiu</strong>, arba <strong>Automobiliu</strong>.</div></div>
+<div class="step-item"><div class="step-num">3</div><div class="step-text">Bakstelėkite <strong>Generuoti</strong> kad apskaičiuotumėte maršrutą.</div></div>
+</div>
+<h3 class="subsection">Maršruto vedimas</h3>
+<ul class="doc-list">
+<li>Sistema sugeneruoja kelią iki artimiausio evakuacijos pabaigos taško.</li>
+<li>Naudotojai visada nukreipiami į artimiausią saugų išėjimą pagal dabartinę vietą.</li>
+<li>Kelias rodomas žemėlapyje, kad naudotojai galėtų juo saugiai sekti.</li>
+</ul>
+</div>
+<div class="video-col">
+<div class="video-card" onclick="openVideoWindow('videos/EvacuationMobile.mp4')" role="button" tabindex="0">
+<video preload="metadata" src="videos/EvacuationMobile.mp4"></video>
+<div class="video-overlay"><div class="play-btn"></div></div>
+<div class="video-tag">Spustelėkite, kad išskleistumėte</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ==================== ADDITIONAL MODULES ==================== -->
+<div class="doc-section" id="additional-modules">
+<div class="section-card">
+<div class="section-title">
+<div class="title-icon bg-slate-100 text-slate-600">
+<svg fill="currentColor" height="20" viewbox="0 0 20 20" width="20"><path d="M10.75 16.82A7.462 7.462 0 0115 15.5c.71 0 1.396.098 2.046.282A.75.75 0 0018 15.06V3.94a.75.75 0 00-.546-.722A9.006 9.006 0 0015 2.8a8.96 8.96 0 00-4.25 1.063v12.958zM9.25 4.863A8.96 8.96 0 005 3.8a9.006 9.006 0 00-2.454.418A.75.75 0 002 4.94v11.12a.75.75 0 00.954.722A7.462 7.462 0 015 16.5a7.46 7.46 0 014.25 1.32V4.863z"></path></svg>
+</div>
+                        Papildomi moduliai
+                    </div>
+<div class="section-divider"></div>
+<div class="feature-grid">
+<div class="feature-card">
+<h4>3 modulis: reagavimas į neplanuotą žmogaus sukeltą nelaimę</h4>
+<p>Dokumentacija apie reagavimą į netikėtas žmogaus sukeltas ekstremalias situacijas bus pateikta netrukus.</p>
+</div>
+<div class="feature-card">
+<h4>4 modulis: gamtinės nelaimės incidento valdymas</h4>
+<p>Dokumentacija apie gamtinių nelaimių valdymo operacijas bus pateikta netrukus.</p>
+</div>
+</div>
+</div>
+</div>
+</div><!-- /content-body -->
+</div><!-- /main-content -->
+<!-- Back to top -->
+<button aria-label="Atgal į viršų" id="back-to-top">
+<svg fill="currentColor" height="20" viewbox="0 0 20 20" width="20"><path clip-rule="evenodd" d="M10 17a.75.75 0 01-.75-.75V5.612L5.29 9.77a.75.75 0 01-1.08-1.04l5.25-5.5a.75.75 0 011.08 0l5.25 5.5a.75.75 0 11-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0110 17z" fill-rule="evenodd"></path></svg>
+</button>
+<!-- Modal for expanded video -->
+<div class="modal" id="videoModal">
+<div class="modal-inner">
+<button class="modal-close" onclick="closeModal()">×</button>
+<video autoplay="" controls="" id="modalVideo"></video>
+</div>
+</div>
+<script>
+    // ---- Video popup window ----
+    function openVideoWindow(videoSrc) {
+        const url = 'video-player.html?src=' + encodeURIComponent(videoSrc);
+        const w = 720, h = 405;
+        const left = Math.max(0, Math.round((screen.width - w) / 2));
+        const top  = Math.max(0, Math.round((screen.height - h) / 2));
+        const features = `popup=yes,width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=no,noopener=yes,noreferrer=yes`;
+        const win = window.open(url, 'videoWindow', features);
+        if (win) win.focus();
+    }
+
+    // ---- Modal ----
+    function openModal(videoUrl) {
+        const modal = document.getElementById('videoModal');
+        const video = document.getElementById('modalVideo');
+        video.src = videoUrl;
+        video.play();
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+        const modal = document.getElementById('videoModal');
+        const video = document.getElementById('modalVideo');
+        video.pause();
+        video.src = '';
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    document.getElementById('videoModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+
+    // ---- Sidebar toggle (mobile) ----
+    const hamburger = document.getElementById('hamburger');
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('open');
+        sidebar.classList.toggle('open');
+        backdrop.classList.toggle('open');
+    });
+    backdrop.addEventListener('click', () => {
+        hamburger.classList.remove('open');
+        sidebar.classList.remove('open');
+        backdrop.classList.remove('open');
+    });
+
+    // ---- Nav group collapse ----
+    function toggleGroup(el) {
+        const items = el.nextElementSibling;
+        el.classList.toggle('collapsed');
+        items.classList.toggle('collapsed');
+    }
+
+    // ---- Scroll spy ----
+    const sections = document.querySelectorAll('.doc-section[id]');
+    const navItems = document.querySelectorAll('.nav-item[data-section]');
+    const breadcrumbEl = document.getElementById('breadcrumb-section');
+
+    const sectionNames = {
+        'module1':'Platform Overview','module2':'Plan Event','groups-users':'Groups & Users',
+        'devices':'Devices','media-sources':'Media Sources','zones-sectors':'Zones & Sectors',
+        'tasks':'Tasks','event-plan':'Event Plan','evacuation':'Evacuation','incidents':'Incidents',
+        'activity-log':'Activity Log','realtime-locations':'Real-Time Locations','tasks-review':'Tasks Review',
+        'messaging':'Messaging','timeline':'Timeline','orthophotos':'Orthophotos','mobile':'Mobile App','mobile-incidents':'Mobile Incidents','mobile-streaming':'Streaming Video',
+        'mobile-messaging':'Mobile Messaging','mobile-evacuation':'Mobile Evacuation','additional-modules':'Additional Modules'
+    };
+
+    function updateScrollSpy() {
+        const scrollPos = window.scrollY + 120;
+        let current = null;
+        sections.forEach(s => { if (s.offsetTop <= scrollPos) current = s; });
+        if (current) {
+            navItems.forEach(n => {
+                n.classList.toggle('active', n.dataset.section === current.id);
+            });
+            breadcrumbEl.textContent = sectionNames[current.id] || current.id;
+        }
+    }
+
+    // ---- Reading progress ----
+    const progressBar = document.getElementById('reading-progress');
+    const progressBarMini = document.getElementById('progress-bar-mini');
+    const progressText = document.getElementById('progress-text');
+
+    function updateProgress() {
+        const winH = window.innerHeight;
+        const docH = document.documentElement.scrollHeight - winH;
+        const pct = docH > 0 ? Math.min(100, Math.round((window.scrollY / docH) * 100)) : 0;
+        progressBar.style.width = pct + '%';
+        progressBarMini.style.width = pct + '%';
+        progressText.textContent = pct + '%';
+    }
+
+    // ---- Back to top ----
+    const backToTop = document.getElementById('back-to-top');
+    function updateBackToTop() {
+        backToTop.classList.toggle('visible', window.scrollY > 400);
+    }
+    backToTop.addEventListener('click', () => window.scrollTo({ top:0, behavior:'smooth' }));
+
+    // ---- Scroll handler ----
+    window.addEventListener('scroll', () => { updateScrollSpy(); updateProgress(); updateBackToTop(); }, { passive:true });
+    window.addEventListener('load', () => { updateScrollSpy(); updateProgress(); });
+
+    // ---- Intersection observer for fade-in ----
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+    }, { threshold:0.08 });
+    sections.forEach(s => observer.observe(s));
+
+    // ---- Smooth scroll nav clicks ----
+    navItems.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const id = this.getAttribute('href').substring(1);
+            const el = document.getElementById(id);
+            if (el) {
+                window.scrollTo({ top: el.offsetTop - 60, behavior:'smooth' });
+                // Close mobile sidebar
+                hamburger.classList.remove('open');
+                sidebar.classList.remove('open');
+                backdrop.classList.remove('open');
+            }
+        });
+    });
+
+    // ---- Sidebar search ----
+    document.getElementById('sidebar-search').addEventListener('input', function() {
+        const q = this.value.toLowerCase().trim();
+        navItems.forEach(item => {
+            const text = item.textContent.toLowerCase();
+            item.style.display = (!q || text.includes(q)) ? '' : 'none';
+        });
+    });
+    </script>
+</body>
+</html>
