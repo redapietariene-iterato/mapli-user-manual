@@ -30,25 +30,68 @@
         /* ---- Progress bar ---- */
         #reading-progress { position:fixed; top:0; left:0; height:3px; background:linear-gradient(90deg,#2563eb,#60a5fa); z-index:9999; transition:width .15s linear; width:0; }
 
-        /* ---- Sidebar ---- */
-        #sidebar { width:280px; position:fixed; top:0; left:0; bottom:0; background:#0f172a; z-index:1000; display:flex; flex-direction:column; transition:transform .3s cubic-bezier(.4,0,.2,1); }
-        #sidebar-nav { flex:1; overflow-y:auto; scrollbar-width:thin; scrollbar-color:#334155 transparent; }
-        #sidebar-nav::-webkit-scrollbar { width:4px; }
-        #sidebar-nav::-webkit-scrollbar-track { background:transparent; }
-        #sidebar-nav::-webkit-scrollbar-thumb { background:#334155; border-radius:4px; }
+     /* ---- Sidebar ---- */
+#sidebar {
+  width: 280px; position: fixed; top: 0; left: 0; bottom: 0;
+  background: #0f172a; z-index: 1000; display: flex;
+  flex-direction: column; transition: transform .3s cubic-bezier(.4,0,.2,1);
+}
+#sidebar-nav {
+  flex: 1; overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: #475569 transparent; /* was #334155 */
+}
+#sidebar-nav::-webkit-scrollbar { width: 4px; }
+#sidebar-nav::-webkit-scrollbar-track { background: transparent; }
+#sidebar-nav::-webkit-scrollbar-thumb {
+  background: #475569; /* was #334155 */
+  border-radius: 4px;
+}
 
-        .nav-group-title { font-size:.65rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#64748b; padding:.75rem 1.25rem .375rem; user-select:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between; transition:color .2s; }
-        .nav-group-title:hover { color:#94a3b8; }
-        .nav-group-title svg { width:14px; height:14px; transition:transform .25s; }
-        .nav-group-title.collapsed svg { transform:rotate(-90deg); }
-        .nav-group-items { overflow:hidden; transition:max-height .35s cubic-bezier(.4,0,.2,1), opacity .25s; max-height:800px; opacity:1; }
-        .nav-group-items.collapsed { max-height:0; opacity:0; }
+.nav-group-title {
+  font-size: .65rem; font-weight: 700; letter-spacing: .12em;  /* was .1em — slightly more spread */
+  text-transform: uppercase;
+  color: #cbd5e1;                                               /* was #94a3b8 — matches inactive nav items */
+  padding: .75rem 1.25rem .375rem; user-select: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+  transition: color .2s;
+}
+.nav-group-title:hover { color: #f1f5f9; }                     /* was #e2e8f0 — brighter hover too */
 
-        .nav-item { display:flex; align-items:center; gap:.625rem; padding:.5rem 1.25rem; font-size:.8125rem; color:#94a3b8; text-decoration:none; transition:all .2s; border-left:2px solid transparent; cursor:pointer; position:relative; }
-        .nav-item:hover { color:#e2e8f0; background:rgba(255,255,255,.04); }
-        .nav-item.active { color:#ffffff; background:rgba(37,99,235,.12); border-left-color:#2563eb; }
-        .nav-item .nav-icon { width:18px; height:18px; flex-shrink:0; opacity:.6; }
-        .nav-item.active .nav-icon { opacity:1; }
+.nav-group-title svg { width: 14px; height: 14px; transition: transform .25s; }
+.nav-group-title.collapsed svg { transform: rotate(-90deg); }
+.nav-group-items {
+  overflow: hidden;
+  transition: max-height .35s cubic-bezier(.4,0,.2,1), opacity .25s;
+  max-height: 800px; opacity: 1;
+}
+.nav-group-items.collapsed { max-height: 0; opacity: 0; }
+
+.nav-item {
+  display: flex; align-items: center; gap: .625rem;
+  padding: .5rem 1.25rem; font-size: .8125rem;
+  color: #cbd5e1; /* was #94a3b8 — brighter for inactive items */
+  text-decoration: none; transition: all .2s;
+  border-left: 2px solid transparent; cursor: pointer; position: relative;
+}
+
+.nav-item:hover {
+  color: #f1f5f9;
+  background: rgba(255,255,255,.12); /* was .06 — 2× brighter, clearly visible */
+}
+
+.nav-item.active {
+  color: #ffffff;
+  background: rgba(37,99,235,.28);   /* was .15 — much more visible blue wash */
+  border-left: 3px solid #60a5fa;    /* wider + lighter blue, pops more on dark bg */
+  border-radius: 0 6px 6px 0;        /* subtle rounding on the right side only */
+}
+
+.nav-item .nav-icon {
+  width: 18px; height: 18px; flex-shrink: 0;
+  opacity: .75; /* was .6 — less faded */
+}
+.nav-item.active .nav-icon { opacity: 1; }
+
 
         /* ---- Main content ---- */
         #main-content { margin-left:280px; min-height:100vh; }
@@ -147,12 +190,40 @@
         #hamburger.open span:nth-child(3) { transform:rotate(-45deg) translate(2.5px,-2.5px); }
         #sidebar-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:999; }
 
-        /* ---- Search ---- */
-        .sidebar-search { padding:.75rem 1rem; position:relative; }
-        .sidebar-search input { width:100%; background:#1e293b; border:1px solid #334155; border-radius:8px; padding:.5rem .75rem .5rem 2.25rem; color:#e2e8f0; font-size:.8125rem; outline:none; transition:border-color .2s, box-shadow .2s; font-family:inherit; }
-        .sidebar-search input::placeholder { color:#64748b; }
-        .sidebar-search input:focus { border-color:#2563eb; box-shadow:0 0 0 3px rgba(37,99,235,.15); }
-        .sidebar-search svg { position:absolute; left:1.625rem; top:50%; transform:translateY(-50%); width:14px; height:14px; color:#64748b; pointer-events:none; }
+   /* ---- Search ---- */
+.sidebar-search { padding: .75rem 1rem; position: relative; }
+
+.sidebar-search input {
+  width: 100%;
+  background: #1e3a5f;                        /* was #1e293b — blue-tinted, stands out from sidebar */
+  border: 1px solid #3b5a8a;                  /* was #334155 — clearly visible border */
+  border-radius: 8px;
+  padding: .5rem .75rem .5rem 2.25rem;
+  color: #f1f5f9;                             /* was #e2e8f0 — slightly brighter text */
+  font-size: .8125rem;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s, background .2s;
+  font-family: inherit;
+}
+
+.sidebar-search input::placeholder {
+  color: #94a3b8;                             /* was #64748b — much more readable */
+}
+
+.sidebar-search input:focus {
+  background: #1e3f6e;                        /* slightly lighter on focus */
+  border-color: #60a5fa;                      /* was #2563eb — matches active item border */
+  box-shadow: 0 0 0 3px rgba(96,165,250,.2);  /* was .15 — more visible glow, matches border color */
+}
+
+.sidebar-search svg {
+  position: absolute; left: 1.625rem; top: 50%;
+  transform: translateY(-50%);
+  width: 14px; height: 14px;
+  color: #94a3b8;                             /* was #64748b — matches placeholder brightness */
+  pointer-events: none;
+}
+
 
         /* ---- Responsive ---- */
         @media (max-width:1024px) {
@@ -190,13 +261,19 @@
     <!-- ========== SIDEBAR ========== -->
     <aside id="sidebar">
         <!-- Logo -->
-        <div class="flex items-center gap-2.5 px-5 py-5 border-b border-white/[.08]">
-            <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="14" fill="#2563eb"/><path d="M14 7a5 5 0 0 1 5 5c0 3.5-5 9-5 9s-5-5.5-5-9a5 5 0 0 1 5-5z" fill="#fff"/><circle cx="14" cy="12" r="2" fill="#2563eb"/></svg>
-            <div>
-                <span class="text-white font-extrabold text-lg tracking-tight">Mapli</span>
-                <span class="block text-[.6rem] text-slate-500 font-medium tracking-wide uppercase">User Guide</span>
-            </div>
+       <div class="flex items-center gap-2.5 px-5 py-5 border-b border-white/[.08]">
+            <svg width="120" height="45" viewBox="0 0 1374 519" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1226.16 363.844H1280.27V228.97C1280.27 98.7333 1279.88 94.0958 1272.15 84.0479C1265.58 75.5458 1261.33 74 1245.09 74H1226.16V363.844Z" fill="white"/>
+                <path d="M1318.92 116.51H1373.03V102.984C1373.03 82.8886 1362.21 74 1338.24 74H1318.92V116.51Z" fill="white"/>
+                <path d="M502.617 143.176C482.132 149.746 464.353 163.658 455.85 179.89C448.12 194.575 447.347 201.531 446.187 279.596L445.028 363.844H499.139L500.298 284.233C501.458 206.169 501.458 204.623 510.734 197.28C523.488 186.846 554.795 187.232 565.231 197.667C572.575 205.009 572.961 210.42 572.961 284.62V363.844H630.937V286.552C630.937 209.26 630.937 208.874 640.6 199.599C652.581 187.232 679.637 186.073 693.164 197.28C702.054 204.623 702.441 206.555 704.373 278.823C706.692 364.23 706.306 363.844 742.251 363.844H763.122L761.576 283.46C759.643 194.961 756.165 179.117 734.521 160.953C708.625 138.925 649.489 133.901 617.023 150.519C603.495 157.475 602.722 157.475 587.648 150.132C570.256 141.244 520.396 137.379 502.617 143.176Z" fill="white"/>
+                <path d="M843.515 143.949C818.392 151.678 803.705 166.75 795.588 192.643C792.883 201.145 793.656 201.531 818.392 201.531C838.491 201.531 846.607 199.599 853.951 193.802C866.319 184.141 896.08 183.368 908.448 192.256C928.16 206.169 913.473 218.922 868.252 226.651C831.533 233.221 804.478 245.974 796.361 260.659C781.288 288.871 786.699 325.971 808.73 346.067C826.509 361.911 841.196 365.39 881.779 363.071C905.743 361.525 915.792 359.206 929.706 351.091C963.718 330.995 971.062 311.672 971.062 240.564C971.062 176.411 967.197 165.591 938.596 151.678C916.951 140.857 867.092 136.993 843.515 143.949ZM911.154 298.146C895.307 329.063 843.515 327.903 843.515 296.6C843.515 277.664 850.472 271.867 884.098 262.205L915.019 253.317L916.178 269.934C916.951 279.596 914.632 291.19 911.154 298.146Z" fill="white"/>
+                <path d="M1058.41 145.108C1029.42 155.929 1009.71 176.798 1001.98 205.009C999.664 212.739 998.118 268.002 998.118 331.768V445H1017.44C1049.14 445 1052.23 439.203 1052.23 381.234V333.314L1061.89 342.975C1090.88 371.573 1142.28 370.414 1172.82 339.883C1193.3 319.401 1200.26 292.735 1198.33 242.496C1196.39 190.324 1184.8 167.909 1150.79 150.132C1130.69 139.698 1080.06 136.993 1058.41 145.108ZM1115.62 189.938C1148.08 202.304 1154.65 279.209 1125.28 303.943C1105.18 320.56 1075.42 315.536 1061.5 293.122C1051.07 275.345 1051.07 223.946 1061.89 206.555C1072.71 188.392 1094.36 181.822 1115.62 189.938Z" fill="white"/>
+                <path d="M1318.92 363.844H1373.03V259.5C1373.03 160.18 1372.64 154.77 1365.3 147.427C1359.5 141.63 1352.54 139.698 1338.24 139.698H1318.92V363.844Z" fill="white"/>
+                <path d="M0.527832 187.831C0.527832 375.662 126.528 519 184.528 519C242.528 519 329.028 365.5 329.028 365.5C329.028 365.5 319.028 293.5 270.528 300C222.028 306.5 148.528 332 91.7422 272.455C43.0278 222 44.1698 144.151 94.5278 94C140.528 48.1894 220.67 43.8493 271.028 94C295.907 118.776 310.543 149.756 309.528 185C309.703 224.829 301.028 237.778 307.528 264C313.167 286.75 355.028 284 355.028 284C355.028 284 365.028 254.5 365.028 185.355C365.028 81.6188 295.462 0 190.528 0C85.5937 0 0.527832 84.0948 0.527832 187.831Z" fill="white"/>
+                <path d="M237.166 238.784C267.497 208.621 267.724 159.492 237.392 129.329C207.185 99.0413 157.984 98.8155 127.777 129.103C97.4446 159.266 97.4451 208.621 127.777 238.784C157.984 269.072 206.959 269.072 237.166 238.784Z" fill="white"/>
+            </svg>
         </div>
+
 
         <!-- Search -->
         <div class="sidebar-search">
